@@ -3,97 +3,418 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lab Codes</title>
+<title>SOC Lab Codes</title>
 <style>
   :root {
-    --bg: #14171c;
-    --panel: #1c2027;
-    --line: #2d333d;
+    --bg: #0f1218;
+    --panel: #161a23;
+    --sidebar-bg: #12151d;
+    --card-bg: #1a1f2b;
+    --line: #272f3d;
+    --line-active: #3ecf9e;
     --text: #e6e9ee;
     --muted: #8b94a3;
     --accent: #3ecf9e;
+    --accent-glow: rgba(62, 207, 158, 0.15);
     --accent-ink: #08241a;
+    --tab-inactive: #212734;
+    --pre-bg: #0d1016;
     color-scheme: dark;
   }
   @media (prefers-color-scheme: light) {
     :root {
-      --bg: #f4f5f7;
+      --bg: #f3f5f8;
       --panel: #ffffff;
-      --line: #d6dae0;
+      --sidebar-bg: #eaedf2;
+      --card-bg: #ffffff;
+      --line: #d2d7e0;
+      --line-active: #0f8a62;
       --text: #1a1d22;
       --muted: #5d6673;
       --accent: #0f8a62;
+      --accent-glow: rgba(15, 138, 98, 0.12);
       --accent-ink: #ffffff;
+      --tab-inactive: #e4e8ef;
+      --pre-bg: #f8fafc;
       color-scheme: light;
     }
   }
+
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    padding: 24px 16px 48px;
+    padding: 0;
     background: var(--bg);
     color: var(--text);
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     line-height: 1.5;
+    display: flex;
+    min-height: 100vh;
   }
-  main { max-width: 960px; margin: 0 auto; }
-  h1 { font-size: 1.4rem; margin: 0 0 4px; }
-  p.hint { margin: 0 0 24px; color: var(--muted); font-size: 0.95rem; }
-  section {
+
+  /* Sidebar Navigation */
+  aside {
+    width: 290px;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .sidebar-header {
+    padding: 20px 16px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .sidebar-header h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: -0.02em;
+  }
+  .sidebar-header .tag {
+    font-size: 0.7rem;
+    padding: 2px 7px;
+    border-radius: 12px;
+    background: var(--accent-glow);
+    color: var(--accent);
+    font-weight: 600;
+    border: 1px solid var(--accent);
+  }
+  .sidebar-header p {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  /* Search input */
+  .search-wrap {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .search-input {
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-input:focus {
+    border-color: var(--accent);
+  }
+
+  /* Navigation Items */
+  .nav-list {
+    list-style: none;
+    padding: 8px;
+    margin: 0;
+    flex: 1;
+  }
+  .nav-item {
+    margin-bottom: 4px;
+  }
+  .nav-btn {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px 12px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s ease;
+  }
+  .nav-btn:hover {
+    background: var(--card-bg);
+    border-color: var(--line);
+  }
+  .nav-btn.active {
+    background: var(--accent-glow);
+    border-color: var(--accent);
+  }
+  .nav-btn .title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .nav-btn .subtitle {
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  /* Main Content Area */
+  main {
+    flex: 1;
+    max-width: 1100px;
+    padding: 28px 32px 64px;
+    min-width: 0;
+  }
+
+  .exp-header {
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .exp-title-box h2 {
+    font-size: 1.45rem;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .exp-title-box .exp-desc {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  /* View switchers (Tabs: Design / Testbench / All) */
+  .tab-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 18px;
     background: var(--panel);
+    padding: 4px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    width: fit-content;
+  }
+  .tab-btn {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tab-btn:hover {
+    color: var(--text);
+  }
+  .tab-btn.active {
+    background: var(--card-bg);
+    color: var(--accent);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  /* Code Cards */
+  .code-card {
+    background: var(--card-bg);
     border: 1px solid var(--line);
     border-radius: 10px;
     margin-bottom: 24px;
     overflow: hidden;
   }
-  .bar {
+  .code-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    padding: 10px 14px;
+    padding: 10px 16px;
+    background: var(--panel);
     border-bottom: 1px solid var(--line);
   }
-  .bar h2 { margin: 0; font-size: 1.05rem; }
+  .code-bar .label-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .code-bar h3 {
+    margin: 0;
+    font-size: 0.98rem;
+    font-weight: 600;
+  }
+  .badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--line);
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .badge-design {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+  }
+  .badge-tb {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+
   button.copy {
     appearance: none;
     border: 0;
     background: var(--accent);
     color: var(--accent-ink);
     font: inherit;
+    font-size: 0.82rem;
     font-weight: 600;
-    padding: 8px 18px;
+    padding: 6px 14px;
     border-radius: 6px;
     cursor: pointer;
-    min-width: 96px;
+    transition: filter 0.15s, transform 0.05s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
   }
-  button.copy:hover { filter: brightness(1.08); }
-  button.copy:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  button.copy:hover {
+    filter: brightness(1.1);
+  }
+  button.copy:active {
+    transform: scale(0.97);
+  }
+
   pre {
     margin: 0;
-    padding: 14px;
+    padding: 16px;
+    background: var(--pre-bg);
     overflow-x: auto;
-    max-height: 70vh;
+    max-height: 68vh;
     overflow-y: auto;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 0.9rem;
-    line-height: 1.45;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 0.88rem;
+    line-height: 1.48;
     tab-size: 4;
+  }
+
+  .experiment-pane {
+    display: none;
+  }
+  .experiment-pane.active {
+    display: block;
+  }
+
+  /* Responsive styling */
+  @media (max-width: 768px) {
+    body {
+      flex-direction: column;
+    }
+    aside {
+      width: 100%;
+      height: auto;
+      position: static;
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+    main {
+      padding: 16px;
+    }
   }
 </style>
 </head>
 <body>
-<main>
-  <h1>Lab Codes</h1>
-  <p class="hint">Press Copy, then paste into your editor.</p>
 
-  <section>
-    <div class="bar">
-      <h2>Design code</h2>
-      <button class="copy" type="button" data-target="design">Copy</button>
+<!-- SIDEBAR -->
+<aside>
+  <div class="sidebar-header">
+    <h1>SOC Lab Codes <span class="tag">Repo</span></h1>
+    <p>Verilog Designs &amp; Testbenches</p>
+  </div>
+
+  <div class="search-wrap">
+    <input type="text" id="searchInput" class="search-input" placeholder="Search experiments, modules...">
+  </div>
+
+  <ul class="nav-list" id="navList">
+    <li class="nav-item">
+      <button class="nav-btn active" data-exp="exp-ahb-alu">
+        <span class="title">1. ALU_SOC_slave_controller_AHB</span>
+        <span class="subtitle">ahb_alu_slave + alu_4bit</span>
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-btn" data-exp="exp-axi-alu-sram">
+        <span class="title">2. AXI_ALU_SRAM</span>
+        <span class="subtitle">sram_controller + sram_memory_array</span>
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-btn" data-exp="exp-axi-alu-soc">
+        <span class="title">3. AXI_ALU_SOC</span>
+        <span class="subtitle">axi_alu_top + alu_core</span>
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-btn" data-exp="exp-apb-alu-slave">
+        <span class="title">4. ALU_SOC_slave_controller</span>
+        <span class="subtitle">apb_alu_slave + alu_4bit</span>
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-btn" data-exp="exp-fsm-soc-processor">
+        <span class="title">5. FSM_SOC_Processor_Design</span>
+        <span class="subtitle">control_unit &amp; control_unit1 (Moore &amp; Mealy)</span>
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-btn" data-exp="exp-soc-control-unit">
+        <span class="title">6. SOC_control_Unit</span>
+        <span class="subtitle">controlunit + controlunit_tb (8-bit CPU FSM)</span>
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-btn" data-exp="exp-adder-soc-slave">
+        <span class="title">7. Adder_SOC_slave_controller</span>
+        <span class="subtitle">apb_soc_adder + my_adder1</span>
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-btn" data-exp="exp-soc-adder-1">
+        <span class="title">8. soc_adder(1)</span>
+        <span class="subtitle">soc_adder + my_adder1 (Generic Bus Adder)</span>
+      </button>
+    </li>
+  </ul>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main>
+
+  <!-- EXPERIMENT 1: ALU_SOC_slave_controller_AHB -->
+  <div class="experiment-pane active" id="exp-ahb-alu" data-keywords="ahb lite alu 4bit slave wrapper adder sub and or alu_soc_slave_controller_ahb">
+    <div class="exp-header">
+      <div class="exp-title-box">
+        <h2>ALU_SOC_slave_controller_AHB</h2>
+        <p class="exp-desc">4-bit ALU with AHB-Lite single-transfer, zero-wait-state slave wrapper interface</p>
+      </div>
+      <div class="tab-bar">
+        <button class="tab-btn active" data-target-group="exp-ahb-alu" data-view="both">All</button>
+        <button class="tab-btn" data-target-group="exp-ahb-alu" data-view="design">Design</button>
+        <button class="tab-btn" data-target-group="exp-ahb-alu" data-view="tb">Testbench</button>
+      </div>
     </div>
-<pre id="design">
-`timescale 1ns/1ps
+
+    <!-- Design Section -->
+    <div class="code-card" data-role="design">
+      <div class="code-bar">
+        <div class="label-group">
+          <span class="badge badge-design">Design</span>
+          <h3>ahb_alu_slave.v</h3>
+        </div>
+        <button class="copy" type="button" data-target="code-ahb-alu-design">Copy Code</button>
+      </div>
+<pre id="code-ahb-alu-design">`timescale 1ns/1ps
 
 module alu_4bit (
     input  wire [3:0] A,
@@ -273,19 +594,19 @@ module ahb_alu_slave (
 
     // HSIZE is included for interface compatibility.
 
-endmodule
-
-
-</pre>
-  </section>
-
-  <section>
-    <div class="bar">
-      <h2>Testbench code</h2>
-      <button class="copy" type="button" data-target="testbench">Copy</button>
+endmodule</pre>
     </div>
-<pre id="testbench">/
-`timescale 1ns/1ps
+
+    <!-- Testbench Section -->
+    <div class="code-card" data-role="tb">
+      <div class="code-bar">
+        <div class="label-group">
+          <span class="badge badge-tb">Testbench</span>
+          <h3>tb_ahb_alu_slave.v</h3>
+        </div>
+        <button class="copy" type="button" data-target="code-ahb-alu-tb">Copy Code</button>
+      </div>
+<pre id="code-ahb-alu-tb">`timescale 1ns/1ps
 
 module tb_ahb_alu_slave;
 
@@ -342,12 +663,10 @@ module tb_ahb_alu_slave;
         .HRESP     (HRESP)
     );
 
-
     initial begin
         HCLK = 1'b0;
         forever #5 HCLK = ~HCLK;
     end
-
 
     initial begin
         $dumpfile("ahb_alu_waveform.vcd");
@@ -413,7 +732,7 @@ module tb_ahb_alu_slave;
 
         @(posedge HCLK);
 
-        if (HREADYOUT && !HRESP) begin
+        if (HREADYOUT &amp;&amp; !HRESP) begin
             $display("AHB WRITE: ADDR=%h DATA=%h",
                      address, data);
         end
@@ -456,7 +775,7 @@ module tb_ahb_alu_slave;
         #1;
         data = HRDATA;
 
-        if (HREADYOUT && !HRESP) begin
+        if (HREADYOUT &amp;&amp; !HRESP) begin
             $display("AHB READ : ADDR=%h DATA=%h",
                      address, data);
         end
@@ -598,13 +917,3011 @@ module tb_ahb_alu_slave;
         $finish;
     end
 
+endmodule</pre>
+    </div>
+  </div>
+
+  <!-- EXPERIMENT 2: AXI_ALU_SRAM -->
+  <div class="experiment-pane" id="exp-axi-alu-sram" data-keywords="axi alu sram sram_controller sram_memory_array soc_sram_tb axi4-lite memory byte strobe">
+    <div class="exp-header">
+      <div class="exp-title-box">
+        <h2>AXI_ALU_SRAM</h2>
+        <p class="exp-desc">AXI4-Lite style SRAM Controller with 32 KB synchronous byte-enabled memory array</p>
+      </div>
+      <div class="tab-bar">
+        <button class="tab-btn active" data-target-group="exp-axi-alu-sram" data-view="both">All</button>
+        <button class="tab-btn" data-target-group="exp-axi-alu-sram" data-view="design">Design</button>
+        <button class="tab-btn" data-target-group="exp-axi-alu-sram" data-view="tb">Testbench</button>
+      </div>
+    </div>
+
+    <!-- Design Section -->
+    <div class="code-card" data-role="design">
+      <div class="code-bar">
+        <div class="label-group">
+          <span class="badge badge-design">Design</span>
+          <h3>sram_controller.v</h3>
+        </div>
+        <button class="copy" type="button" data-target="code-axi-sram-design">Copy Code</button>
+      </div>
+<pre id="code-axi-sram-design">`timescale 1ns/1ps
+
+// MODULE 1: SRAM MEMORY ARRAY
+// 32 KB = 8192 words x 32 bits
+// Synchronous read and byte-enabled synchronous write
+
+module sram_memory_array (
+    input              clk,
+    input              mem_en,
+    input              mem_we,
+    input      [12:0]  mem_addr,
+    input      [31:0]  mem_wdata,
+    input      [3:0]   mem_wstrb,
+    output reg [31:0]  mem_rdata
+);
+
+    reg [31:0] mem [0:8191];
+    integer i;
+
+    initial begin
+        mem_rdata = 32'b0;
+      for (i = 0; i < 8192; i = i + 1)
+            mem[i] = 32'b0;
+    end
+
+    always @(posedge clk) begin
+        if (mem_en) begin
+            if (mem_we) begin
+                // WSTRB[0] controls bits [7:0]
+                // WSTRB[1] controls bits [15:8]
+                // WSTRB[2] controls bits [23:16]
+                // WSTRB[3] controls bits [31:24]
+
+                if (mem_wstrb[0])
+                    mem[mem_addr][7:0] <= mem_wdata[7:0];
+
+                if (mem_wstrb[1])
+                    mem[mem_addr][15:8] <= mem_wdata[15:8];
+
+                if (mem_wstrb[2])
+                    mem[mem_addr][23:16] <= mem_wdata[23:16];
+
+                if (mem_wstrb[3])
+                    mem[mem_addr][31:24] <= mem_wdata[31:24];
+            end
+            else begin
+                // Synchronous SRAM read
+                mem_rdata <= mem[mem_addr];
+            end
+        end
+    end
+
 endmodule
 
-</pre>
-  </section>
+// MODULE 2: AXI4-LITE-STYLE SRAM CONTROLLER
+// One outstanding transaction at a time.
+// AW and W can arrive independently.
+
+module sram_controller (
+    input             ACLK,
+    input             ARESETn,
+
+    // AXI write address channel
+    input      [31:0] S_AXI_AWADDR,
+    input             S_AXI_AWVALID,
+    output            S_AXI_AWREADY,
+
+    // AXI write data channel
+    input      [31:0] S_AXI_WDATA,
+    input      [3:0]  S_AXI_WSTRB,
+    input             S_AXI_WVALID,
+    output            S_AXI_WREADY,
+
+    // AXI write response channel
+    output            S_AXI_BVALID,
+    input             S_AXI_BREADY,
+    output     [1:0]  S_AXI_BRESP,
+
+    // AXI read address channel
+    input      [31:0] S_AXI_ARADDR,
+    input             S_AXI_ARVALID,
+    output            S_AXI_ARREADY,
+
+    // AXI read data channel
+    output reg [31:0] S_AXI_RDATA,
+    output            S_AXI_RVALID,
+    input             S_AXI_RREADY,
+    output     [1:0]  S_AXI_RRESP,
+
+    // SRAM macro interface
+    output            mem_en,
+    output            mem_we,
+    output     [12:0] mem_addr,
+    output     [31:0] mem_wdata,
+    output     [3:0]  mem_wstrb,
+    input      [31:0] mem_rdata
+);
+
+    // FSM states
+    localparam IDLE       = 3'd0;
+    localparam WRITE_MEM  = 3'd1;
+    localparam WRITE_RESP = 3'd2;
+    localparam READ_MEM   = 3'd3;
+    localparam READ_CAP   = 3'd4;
+    localparam READ_RESP  = 3'd5;
+
+    reg [2:0] state;
+
+    // Hold independently accepted AW and W channels
+    reg aw_pending;
+    reg w_pending;
+
+    reg [31:0] awaddr_reg;
+    reg [31:0] wdata_reg;
+    reg [3:0]  wstrb_reg;
+    reg [31:0] araddr_reg;
+
+    // AXI address is byte-addressed.
+    // [14:2] selects one of 8192 32-bit SRAM words.
+    wire [12:0] word_addr;
+    assign word_addr = araddr_reg[14:2];
+
+    // READY signals
+    assign S_AXI_AWREADY =
+        ARESETn && (state == IDLE) && !aw_pending;
+
+    assign S_AXI_WREADY =
+        ARESETn && (state == IDLE) && !w_pending;
+
+    // Give an already pending/new write priority over a read.
+    assign S_AXI_ARREADY =
+        ARESETn && (state == IDLE) &&
+        !aw_pending && !w_pending &&
+        !S_AXI_AWVALID && !S_AXI_WVALID;
+
+    // Responses
+    assign S_AXI_BVALID = (state == WRITE_RESP);
+    assign S_AXI_RVALID = (state == READ_RESP);
+
+    // OKAY response
+    assign S_AXI_BRESP = 2'b00;
+    assign S_AXI_RRESP = 2'b00;
+
+    // SRAM interface controls
+    assign mem_en =
+        (state == WRITE_MEM) || (state == READ_MEM);
+
+    assign mem_we = (state == WRITE_MEM);
+
+    assign mem_addr =
+        (state == WRITE_MEM) ? awaddr_reg[14:2] :
+        (state == READ_MEM)  ? word_addr :
+                               13'b0;
+
+    assign mem_wdata = wdata_reg;
+    assign mem_wstrb = wstrb_reg;
+
+    // Controller FSM
+    always @(posedge ACLK or negedge ARESETn) begin
+        if (!ARESETn) begin
+            state      <= IDLE;
+            aw_pending <= 1'b0;
+            w_pending  <= 1'b0;
+
+            awaddr_reg <= 32'b0;
+            wdata_reg  <= 32'b0;
+            wstrb_reg  <= 4'b0;
+            araddr_reg <= 32'b0;
+            S_AXI_RDATA <= 32'b0;
+        end
+        else begin
+            case (state)
+
+                IDLE: begin
+                    // Capture write address independently
+                    if (S_AXI_AWVALID && S_AXI_AWREADY) begin
+                        awaddr_reg <= S_AXI_AWADDR;
+                        aw_pending <= 1'b1;
+                    end
+
+                    // Capture write data independently
+                    if (S_AXI_WVALID && S_AXI_WREADY) begin
+                        wdata_reg <= S_AXI_WDATA;
+                        wstrb_reg <= S_AXI_WSTRB;
+                        w_pending <= 1'b1;
+                    end
+
+                    // Start write after both address and data
+                    // have been accepted.
+                    if ((aw_pending ||
+                         (S_AXI_AWVALID && S_AXI_AWREADY)) &&
+                        (w_pending ||
+                         (S_AXI_WVALID && S_AXI_WREADY))) begin
+                        state <= WRITE_MEM;
+                    end
+                    else if (S_AXI_ARVALID && S_AXI_ARREADY) begin
+                        araddr_reg <= S_AXI_ARADDR;
+                        state <= READ_MEM;
+                    end
+                end
+
+                WRITE_MEM: begin
+                    // SRAM writes at this rising edge.
+                    // mem_en=1 and mem_we=1.
+                    aw_pending <= 1'b0;
+                    w_pending  <= 1'b0;
+                    state <= WRITE_RESP;
+                end
+
+                WRITE_RESP: begin
+                    // Keep BVALID asserted until accepted.
+                    if (S_AXI_BREADY)
+                        state <= IDLE;
+                end
+
+                READ_MEM: begin
+                    // SRAM samples read address at this edge.
+                    // Its registered read data becomes available
+                    // after this edge.
+                    state <= READ_CAP;
+                end
+
+                READ_CAP: begin
+                    // Capture the data produced by SRAM.
+                    S_AXI_RDATA <= mem_rdata;
+                    state <= READ_RESP;
+                end
+
+                READ_RESP: begin
+                    // Keep RVALID and RDATA stable until accepted.
+                    if (S_AXI_RREADY)
+                        state <= IDLE;
+                end
+
+                default: state <= IDLE;
+
+            endcase
+        end
+    end
+
+endmodule</pre>
+    </div>
+
+    <!-- Testbench Section -->
+    <div class="code-card" data-role="tb">
+      <div class="code-bar">
+        <div class="label-group">
+          <span class="badge badge-tb">Testbench</span>
+          <h3>soc_sram_tb.v</h3>
+        </div>
+        <button class="copy" type="button" data-target="code-axi-sram-tb">Copy Code</button>
+      </div>
+<pre id="code-axi-sram-tb">`timescale 1ns/1ps
+
+module soc_sram_tb;
+
+    reg ACLK;
+    reg ARESETn;
+
+    reg [31:0] S_AXI_AWADDR;
+    reg        S_AXI_AWVALID;
+    wire       S_AXI_AWREADY;
+
+    reg [31:0] S_AXI_WDATA;
+    reg [3:0]  S_AXI_WSTRB;
+    reg        S_AXI_WVALID;
+    wire       S_AXI_WREADY;
+
+    wire       S_AXI_BVALID;
+    reg        S_AXI_BREADY;
+    wire [1:0] S_AXI_BRESP;
+
+    reg [31:0] S_AXI_ARADDR;
+    reg        S_AXI_ARVALID;
+    wire       S_AXI_ARREADY;
+
+    wire [31:0] S_AXI_RDATA;
+    wire        S_AXI_RVALID;
+    reg         S_AXI_RREADY;
+    wire [1:0] S_AXI_RRESP;
+
+    wire        mem_en;
+    wire        mem_we;
+    wire [12:0] mem_addr;
+    wire [31:0] mem_wdata;
+    wire [3:0]  mem_wstrb;
+    wire [31:0] mem_rdata;
+
+    reg [31:0] read_value;
+
+    initial ACLK = 1'b0;
+    always #5 ACLK = ~ACLK;
+
+    sram_controller DUT_CONTROLLER (
+        .ACLK(ACLK),
+        .ARESETn(ARESETn),
+
+        .S_AXI_AWADDR(S_AXI_AWADDR),
+        .S_AXI_AWVALID(S_AXI_AWVALID),
+        .S_AXI_AWREADY(S_AXI_AWREADY),
+
+        .S_AXI_WDATA(S_AXI_WDATA),
+        .S_AXI_WSTRB(S_AXI_WSTRB),
+        .S_AXI_WVALID(S_AXI_WVALID),
+        .S_AXI_WREADY(S_AXI_WREADY),
+
+        .S_AXI_BVALID(S_AXI_BVALID),
+        .S_AXI_BREADY(S_AXI_BREADY),
+        .S_AXI_BRESP(S_AXI_BRESP),
+
+        .S_AXI_ARADDR(S_AXI_ARADDR),
+        .S_AXI_ARVALID(S_AXI_ARVALID),
+        .S_AXI_ARREADY(S_AXI_ARREADY),
+
+        .S_AXI_RDATA(S_AXI_RDATA),
+        .S_AXI_RVALID(S_AXI_RVALID),
+        .S_AXI_RREADY(S_AXI_RREADY),
+        .S_AXI_RRESP(S_AXI_RRESP),
+
+        .mem_en(mem_en),
+        .mem_we(mem_we),
+        .mem_addr(mem_addr),
+        .mem_wdata(mem_wdata),
+        .mem_wstrb(mem_wstrb),
+        .mem_rdata(mem_rdata)
+    );
+
+    // Instantiate physical SRAM model
+    sram_memory_array DUT_SRAM (
+        .clk(ACLK),
+        .mem_en(mem_en),
+        .mem_we(mem_we),
+        .mem_addr(mem_addr),
+        .mem_wdata(mem_wdata),
+        .mem_wstrb(mem_wstrb),
+        .mem_rdata(mem_rdata)
+    );
+
+    task axi_write;
+        input [31:0] address;
+        input [31:0] data;
+        input [3:0]  strobe;
+        begin
+            @(negedge ACLK);
+            S_AXI_AWADDR  = address;
+            S_AXI_AWVALID = 1'b1;
+            S_AXI_WDATA   = data;
+            S_AXI_WSTRB   = strobe;
+            S_AXI_WVALID  = 1'b1;
+
+            // Wait until both channels are accepted.
+            begin : WAIT_WRITE_ACCEPT
+                reg aw_done;
+                reg w_done;
+                aw_done = 1'b0;
+                w_done  = 1'b0;
+
+                while (!(aw_done && w_done)) begin
+                    @(posedge ACLK);
+                    if (S_AXI_AWVALID && S_AXI_AWREADY)
+                        aw_done = 1'b1;
+                    if (S_AXI_WVALID && S_AXI_WREADY)
+                        w_done = 1'b1;
+                    @(negedge ACLK);
+                    if (aw_done)
+                        S_AXI_AWVALID = 1'b0;
+                    if (w_done)
+                        S_AXI_WVALID = 1'b0;
+                end
+            end
+
+            // Wait for write response
+            while (!S_AXI_BVALID)
+                @(negedge ACLK);
+
+            if (S_AXI_BRESP != 2'b00)
+                $display("ERROR: Write response error!");
+
+            S_AXI_BREADY = 1'b1;
+            @(posedge ACLK);
+            @(negedge ACLK);
+            S_AXI_BREADY = 1'b0;
+
+            $display(
+                "[%0t] WRITE: ADDR=%h DATA=%h WSTRB=%b",
+                $time, address, data, strobe
+            );
+        end
+    endtask
+
+    // AXI READ TASK
+    task axi_read;
+        input  [31:0] address;
+        output [31:0] data;
+        begin
+            @(negedge ACLK);
+            S_AXI_ARADDR  = address;
+            S_AXI_ARVALID = 1'b1;
+
+            // Address handshake
+            begin : WAIT_READ_ADDRESS
+                reg ar_done;
+                ar_done = 1'b0;
+                while (!ar_done) begin
+                    @(posedge ACLK);
+                    if (S_AXI_ARVALID && S_AXI_ARREADY)
+                        ar_done = 1'b1;
+                    @(negedge ACLK);
+                    if (ar_done)
+                        S_AXI_ARVALID = 1'b0;
+                end
+            end
+
+            // Accept read response
+            S_AXI_RREADY = 1'b1;
+            while (!S_AXI_RVALID)
+                @(negedge ACLK);
+
+            data = S_AXI_RDATA;
+
+            if (S_AXI_RRESP != 2'b00)
+                $display("ERROR: Read response error!");
+
+            @(posedge ACLK);
+            @(negedge ACLK);
+            S_AXI_RREADY = 1'b0;
+
+            $display(
+                "[%0t] READ : ADDR=%h DATA=%h",
+                $time, address, data
+            );
+        end
+    endtask
+
+    // MAIN TEST SEQUENCE
+    initial begin
+        ARESETn = 1'b0;
+
+        S_AXI_AWADDR  = 0;
+        S_AXI_AWVALID = 0;
+        S_AXI_WDATA   = 0;
+        S_AXI_WSTRB   = 0;
+        S_AXI_WVALID  = 0;
+        S_AXI_BREADY  = 0;
+        S_AXI_ARADDR  = 0;
+        S_AXI_ARVALID = 0;
+        S_AXI_RREADY  = 0;
+        read_value    = 0;
+
+        repeat (3) @(negedge ACLK);
+        ARESETn = 1'b1;
+
+        repeat (2) @(negedge ACLK);
+
+        $display("\n======================================");
+        $display(" TEST 1: FULL-WORD WRITE AND READ");
+        $display("======================================");
+
+        axi_write(32'h00002000, 32'h12345678, 4'b1111);
+        axi_read (32'h00002000, read_value);
+
+        if (read_value === 32'h12345678)
+            $display("PASS: Full-word readback matches.");
+        else
+            $display("FAIL: Expected 12345678, got %h",
+                     read_value);
+
+        $display("\n======================================");
+        $display(" TEST 2: PARTIAL-WORD WRITE");
+        $display("======================================");
+
+        // Update only bytes [15:0].
+        axi_write(32'h00002000, 32'hAABBCCDD, 4'b0011);
+        axi_read (32'h00002000, read_value);
+
+        if (read_value === 32'h1234CCDD)
+            $display("PASS: Partial-write byte enables work.");
+        else
+            $display("FAIL: Expected 1234CCDD, got %h",
+                     read_value);
+
+        $display("\n======================================");
+        $display(" TEST 3: ANOTHER SRAM WORD");
+        $display("======================================");
+
+        axi_write(32'h00002004, 32'hDEADBEEF, 4'b1111);
+        axi_read (32'h00002004, read_value);
+
+        if (read_value === 32'hDEADBEEF)
+            $display("PASS: Second word readback matches.");
+        else
+            $display("FAIL: Expected DEADBEEF, got %h",
+                     read_value);
+
+        $display("\n======================================");
+        $display(" ALL TESTS FINISHED");
+        $display("======================================");
+
+        #20;
+        $finish;
+    end
+
+    initial begin
+        $dumpfile("sram_wave.vcd");
+        $dumpvars(0, soc_sram_tb);
+    end
+
+endmodule</pre>
+    </div>
+  </div>
+
+  <!-- EXPERIMENT 3: AXI_ALU_SOC -->
+  <div class="experiment-pane" id="exp-axi-alu-soc" data-keywords="axi alu soc axi_alu_top alu_core tb_axi_alu axi-like 32-bit adder sub and or">
+    <div class="exp-header">
+      <div class="exp-title-box">
+        <h2>AXI_ALU_SOC</h2>
+        <p class="exp-desc">AXI-Like 32-bit ALU Core with independently buffered write/read channels</p>
+      </div>
+      <div class="tab-bar">
+        <button class="tab-btn active" data-target-group="exp-axi-alu-soc" data-view="both">All</button>
+        <button class="tab-btn" data-target-group="exp-axi-alu-soc" data-view="design">Design</button>
+        <button class="tab-btn" data-target-group="exp-axi-alu-soc" data-view="tb">Testbench</button>
+      </div>
+    </div>
+
+    <!-- Design Section -->
+    <div class="code-card" data-role="design">
+      <div class="code-bar">
+        <div class="label-group">
+          <span class="badge badge-design">Design</span>
+          <h3>axi_alu_top.v</h3>
+        </div>
+        <button class="copy" type="button" data-target="code-axi-alu-soc-design">Copy Code</button>
+      </div>
+<pre id="code-axi-alu-soc-design">`timescale 1ns/1ps
+
+module alu_core (
+    input  wire [31:0] a,
+    input  wire [31:0] b,
+    input  wire [1:0]  op,
+    output reg  [31:0] result
+);
+    always @(*) begin
+        case (op)
+            2'b00: result = a + b;
+            2'b01: result = a - b;
+            2'b10: result = a &amp; b;
+            2'b11: result = a | b;
+            default: result = 32'b0;
+        endcase
+    end
+endmodule
+
+
+module axi_alu_top (
+    input  wire        aclk,
+    input  wire        aresetn,
+
+    // Write Address Channel
+    input  wire [31:0] awaddr,
+    input  wire        awvalid,
+    output wire        awready,
+
+    // Write Data Channel
+    input  wire [31:0] wdata,
+    input  wire        wvalid,
+    output wire        wready,
+
+    // Write Response Channel
+    output reg  [1:0]  bresp,
+    output reg         bvalid,
+    input  wire        bready,
+
+    // Read Address Channel
+    input  wire [31:0] araddr,
+    input  wire        arvalid,
+    output wire        arready,
+
+    // Read Data Channel
+    output reg  [31:0] rdata,
+    output reg  [1:0]  rresp,
+    output reg         rvalid,
+    input  wire        rready
+);
+
+    reg [31:0] reg_a, reg_b;
+    reg [1:0]  reg_op;
+    wire [31:0] alu_result;
+
+    // Independently buffered write channels
+    reg [31:0] saved_awaddr, saved_wdata;
+    reg aw_pending, w_pending;
+
+    assign awready = !aw_pending &amp;&amp; !bvalid;
+    assign wready  = !w_pending  &amp;&amp; !bvalid;
+    assign arready = !rvalid;
+
+    alu_core u_alu (
+        .a      (reg_a),
+        .b      (reg_b),
+        .op     (reg_op),
+        .result (alu_result)
+    );
+
+    // AXI-like write interface
+    always @(posedge aclk or negedge aresetn) begin
+        if (!aresetn) begin
+            reg_a       &lt;= 32'b0;
+            reg_b       &lt;= 32'b0;
+            reg_op      &lt;= 2'b0;
+            saved_awaddr &lt;= 32'b0;
+            saved_wdata  &lt;= 32'b0;
+            aw_pending  &lt;= 1'b0;
+            w_pending   &lt;= 1'b0;
+            bvalid      &lt;= 1'b0;
+            bresp       &lt;= 2'b00;
+        end else begin
+
+            // Capture address independently
+            if (awvalid &amp;&amp; awready) begin
+                saved_awaddr &lt;= awaddr;
+                aw_pending   &lt;= 1'b1;
+            end
+
+            // Capture write data independently
+            if (wvalid &amp;&amp; wready) begin
+                saved_wdata &lt;= wdata;
+                w_pending   &lt;= 1'b1;
+            end
+
+            // Execute write once both channels have been captured.
+            // Nonblocking assignments mean this uses previously
+            // captured address/data on the following clock edge.
+            if (aw_pending &amp;&amp; w_pending &amp;&amp; !bvalid) begin
+                case (saved_awaddr[3:0])
+                    4'h0: reg_a  &lt;= saved_wdata;
+                    4'h4: reg_b  &lt;= saved_wdata;
+                    4'h8: reg_op &lt;= saved_wdata[1:0];
+                    default: ;
+                endcase
+
+                aw_pending &lt;= 1'b0;
+                w_pending  &lt;= 1'b0;
+                bvalid     &lt;= 1'b1;
+                bresp      &lt;= (saved_awaddr[3:0] == 4'h0 ||
+                               saved_awaddr[3:0] == 4'h4 ||
+                               saved_awaddr[3:0] == 4'h8)
+                              ? 2'b00 : 2'b10;
+            end
+
+            // Hold response until accepted
+            if (bvalid &amp;&amp; bready)
+                bvalid &lt;= 1'b0;
+        end
+    end
+
+    // Read interface
+    always @(posedge aclk or negedge aresetn) begin
+        if (!aresetn) begin
+            rdata  &lt;= 32'b0;
+            rresp  &lt;= 2'b00;
+            rvalid &lt;= 1'b0;
+        end else begin
+            // Hold read data stable while RVALID=1 and RREADY=0
+            if (arvalid &amp;&amp; arready) begin
+                case (araddr[3:0])
+                    4'h0: rdata &lt;= reg_a;
+                    4'h4: rdata &lt;= reg_b;
+                    4'h8: rdata &lt;= {30'b0, reg_op};
+                    4'hC: rdata &lt;= alu_result;
+                    default: rdata &lt;= 32'hDEAD_BEEF;
+                endcase
+
+                rresp  &lt;= (araddr[3:0] == 4'h0 ||
+                           araddr[3:0] == 4'h4 ||
+                           araddr[3:0] == 4'h8 ||
+                           araddr[3:0] == 4'hC)
+                          ? 2'b00 : 2'b10;
+                rvalid &lt;= 1'b1;
+            end else if (rvalid &amp;&amp; rready) begin
+                rvalid &lt;= 1'b0;
+            end
+        end
+    end
+
+endmodule</pre>
+    </div>
+
+    <!-- Testbench Section -->
+    <div class="code-card" data-role="tb">
+      <div class="code-bar">
+        <div class="label-group">
+          <span class="badge badge-tb">Testbench</span>
+          <h3>tb_axi_alu.v</h3>
+        </div>
+        <button class="copy" type="button" data-target="code-axi-alu-soc-tb">Copy Code</button>
+      </div>
+<pre id="code-axi-alu-soc-tb">`timescale 1ns/1ps
+
+module tb_axi_alu;
+    reg aclk, aresetn;
+    reg  [31:0] awaddr, wdata, araddr;
+    reg         awvalid, wvalid, bready;
+    reg         arvalid, rready;
+    wire        awready, wready, bvalid;
+    wire        arready, rvalid;
+    wire [1:0]  bresp, rresp;
+    wire [31:0] rdata;
+    reg  [31:0] read_val;
+
+    axi_alu_top uut (
+        .aclk(aclk), .aresetn(aresetn),
+        .awaddr(awaddr), .awvalid(awvalid), .awready(awready),
+        .wdata(wdata), .wvalid(wvalid), .wready(wready),
+        .bresp(bresp), .bvalid(bvalid), .bready(bready),
+        .araddr(araddr), .arvalid(arvalid), .arready(arready),
+        .rdata(rdata), .rresp(rresp), .rvalid(rvalid),
+        .rready(rready)
+    );
+
+    // 100 MHz clock
+    initial aclk = 1'b0;
+    always #5 aclk = ~aclk;
+
+    // Write transaction
+    task axi_write;
+        input [31:0] addr;
+        input [31:0] data;
+        integer addr_done, data_done;
+        begin
+            addr_done = 0;
+            data_done = 0;
+            @(negedge aclk);
+            awaddr  = addr;
+            wdata   = data;
+            awvalid = 1'b1;
+            wvalid  = 1'b1;
+            bready  = 1'b0;
+
+            // Address and data channels handshake independently
+            while (!addr_done || !data_done) begin
+                @(posedge aclk);
+                if (awvalid &amp;&amp; awready) addr_done = 1;
+                if (wvalid &amp;&amp; wready)   data_done = 1;
+                @(negedge aclk);
+                if (addr_done) awvalid = 1'b0;
+                if (data_done) wvalid  = 1'b0;
+            end
+
+            // Accept write response
+            bready = 1'b1;
+            do begin
+                @(posedge aclk);
+            end while (!bvalid);
+
+            if (bresp != 2'b00)
+                $display("WRITE ERROR: addr=%h BRESP=%b", addr, bresp);
+
+            @(negedge aclk);
+            bready = 1'b0;
+        end
+    endtask
+
+    // Read transaction
+    task axi_read;
+        input  [31:0] addr;
+        output [31:0] data;
+        begin
+            @(negedge aclk);
+            araddr  = addr;
+            arvalid = 1'b1;
+            rready  = 1'b0;
+
+            do begin
+                @(posedge aclk);
+            end while (!arready);
+
+            @(negedge aclk);
+            arvalid = 1'b0;
+            rready  = 1'b1;
+
+            do begin
+                @(posedge aclk);
+            end while (!rvalid);
+
+            data = rdata;
+
+            if (rresp != 2'b00)
+                $display("READ ERROR: addr=%h RRESP=%b", addr, rresp);
+
+            @(negedge aclk);
+            rready = 1'b0;
+        end
+    endtask
+
+    task check_result;
+        input [255:0] test_name;
+        input [31:0] actual;
+        input [31:0] expected;
+        begin
+            if (actual === expected)
+                $display("PASS: %0s = %0d (0x%08h)", test_name, actual, actual);
+            else
+                $display("FAIL: %0s actual=%0d expected=%0d", test_name, actual, expected);
+        end
+    endtask
+
+    initial begin
+        aresetn = 1'b0;
+        awaddr = 0; awvalid = 0;
+        wdata = 0; wvalid = 0; bready = 0;
+        araddr = 0; arvalid = 0; rready = 0;
+
+        repeat (3) @(negedge aclk);
+        aresetn = 1'b1;
+        $display("\n--- AXI-Like ALU Test Started ---");
+
+        // Load operands: A=25, B=10
+        axi_write(32'h0, 32'd25);
+        axi_write(32'h4, 32'd10);
+
+        // ADD
+        axi_write(32'h8, 32'd0);
+        axi_read(32'hC, read_val);
+        check_result("ADD: 25 + 10", read_val, 32'd35);
+
+        // SUB
+        axi_write(32'h8, 32'd1);
+        axi_read(32'hC, read_val);
+        check_result("SUB: 25 - 10", read_val, 32'd15);
+
+        // AND
+        axi_write(32'h8, 32'd2);
+        axi_read(32'hC, read_val);
+        check_result("AND: 25 &amp; 10", read_val, (32'd25 &amp; 32'd10));
+
+        // OR
+        axi_write(32'h8, 32'd3);
+        axi_read(32'hC, read_val);
+        check_result("OR: 25 | 10", read_val, (32'd25 | 32'd10));
+
+        $display("--- AXI-Like ALU Test Completed ---");
+        repeat (3) @(negedge aclk);
+        $finish;
+    end
+
+    initial begin
+        $dumpfile("dump.vcd");
+        $dumpvars(0, tb_axi_alu);
+    end
+
+    // Prevent a broken handshake from hanging simulation forever
+    initial begin
+        #10000;
+        $fatal(1, "TIMEOUT: possible handshake deadlock");
+    end
+endmodule</pre>
+    </div>
+  </div>
+
+  <!-- EXPERIMENT 4: ALU_SOC_slave_controller (APB) -->
+  <div class="experiment-pane" id="exp-apb-alu-slave" data-keywords="alu_soc_slave_controller apb alu slave apb_alu_slave alu_4bit tb_apb_alu_slave pslverr pready setup access">
+    <div class="exp-header">
+      <div class="exp-title-box">
+        <h2>ALU_SOC_slave_controller</h2>
+        <p class="exp-desc">4-bit ALU IP with zero-wait-state APB Slave Wrapper interface and PSLVERR generation</p>
+      </div>
+      <div class="tab-bar">
+        <button class="tab-btn active" data-target-group="exp-apb-alu-slave" data-view="both">All</button>
+        <button class="tab-btn" data-target-group="exp-apb-alu-slave" data-view="design">Design</button>
+        <button class="tab-btn" data-target-group="exp-apb-alu-slave" data-view="tb">Testbench</button>
+      </div>
+    </div>
+
+    <!-- Design Section -->
+    <div class="code-card" data-role="design">
+      <div class="code-bar">
+        <div class="label-group">
+          <span class="badge badge-design">Design</span>
+          <h3>apb_alu_slave.v</h3>
+        </div>
+        <button class="copy" type="button" data-target="code-apb-alu-design">Copy Code</button>
+      </div>
+<pre id="code-apb-alu-design">`timescale 1ns/1ps
+
+// 4-BIT ALU IP
+
+module alu_4bit (
+    input  wire [3:0] A,
+    input  wire [3:0] B,
+    input  wire [1:0] OP,
+
+    output reg  [3:0] RESULT
+);
+
+    always @(*) begin
+
+        case (OP)
+
+            2'b00: RESULT = A + B;  // ADD
+            2'b01: RESULT = A - B;  // SUB
+            2'b10: RESULT = A &amp; B;  // AND
+            2'b11: RESULT = A | B;  // OR
+
+            default: RESULT = 4'b0000;
+
+        endcase
+
+    end
+
+endmodule
+
+// APB SLAVE WRAPPER
+
+module apb_alu_slave (
+
+    // APB interface
+    input  wire        PCLK,
+    input  wire        PRESETn,
+
+    input  wire [31:0] PADDR,
+    input  wire        PWRITE,
+    input  wire        PSEL,
+    input  wire        PENABLE,
+    input  wire [31:0] PWDATA,
+
+    output wire [31:0] PRDATA,
+    output wire        PREADY,
+    output wire        PSLVERR
+);
+
+    // Register storage
+
+    reg [3:0] operand_A;
+    reg [3:0] operand_B;
+    reg [1:0] operation;
+
+    wire [3:0] alu_result;
+
+    // Address definitions
+
+    localparam ADDR_A      = 32'h0000_0000;
+    localparam ADDR_B      = 32'h0000_0004;
+    localparam ADDR_OP     = 32'h0000_0008;
+    localparam ADDR_RESULT = 32'h0000_000C;
+
+    // ALU IP instantiation
+
+    alu_4bit U_ALU (
+
+        .A      (operand_A),
+        .B      (operand_B),
+        .OP     (operation),
+        .RESULT (alu_result)
+
+    );
+
+    // APB READY
+    // Zero-wait-state slave
+
+    assign PREADY = PSEL &amp;&amp; PENABLE;
+
+    // Address validity
+
+    wire valid_address;
+
+    assign valid_address =
+           (PADDR == ADDR_A)      ||
+           (PADDR == ADDR_B)      ||
+           (PADDR == ADDR_OP)     ||
+           (PADDR == ADDR_RESULT);
+
+    // APB ERROR
+  
+    assign PSLVERR =
+           PSEL &amp;&amp; PENABLE &amp;&amp; !valid_address;
+
+    // WRITE OPERATION
+   
+    always @(posedge PCLK) begin
+
+        if (!PRESETn) begin
+
+            operand_A &lt;= 4'b0000;
+            operand_B &lt;= 4'b0000;
+            operation &lt;= 2'b00;
+
+        end
+
+        else begin
+
+            if (PSEL &amp;&amp; PENABLE &amp;&amp; PWRITE) begin
+
+                case (PADDR)
+
+                    ADDR_A: begin
+                        operand_A &lt;= PWDATA[3:0];
+                    end
+
+                    ADDR_B: begin
+                        operand_B &lt;= PWDATA[3:0];
+                    end
+
+                    ADDR_OP: begin
+                        operation &lt;= PWDATA[1:0];
+                    end
+
+                    ADDR_RESULT: begin
+                        // RESULT is read-only
+                    end
+
+                    default: begin
+                        // Invalid address
+                    end
+
+                endcase
+
+            end
+
+        end
+
+    end
+
+    // READ OPERATION
+   
+    reg [31:0] read_data;
+
+    always @(*) begin
+
+        read_data = 32'h0000_0000;
+
+        if (PSEL &amp;&amp; PENABLE &amp;&amp; !PWRITE) begin
+
+            case (PADDR)
+
+                ADDR_A: begin
+                    read_data = {28'b0, operand_A};
+                end
+
+                ADDR_B: begin
+                    read_data = {28'b0, operand_B};
+                end
+
+                ADDR_OP: begin
+                    read_data = {30'b0, operation};
+                end
+
+                ADDR_RESULT: begin
+                    read_data = {28'b0, alu_result};
+                end
+
+                default: begin
+                    read_data = 32'h0000_0000;
+                end
+
+            endcase
+
+        end
+
+    end
+
+    assign PRDATA = read_data;
+
+endmodule
+
+/*
+| Address | Register    | Function                        |
+| ------- | ----------- | ------------------------------- |
+| `0x00`  | `OPERAND_A` | 4-bit operand A                 |
+| `0x04`  | `OPERAND_B` | 4-bit operand B                 |
+| `0x08`  | `OPERATION` | `00=ADD, 01=SUB, 10=AND, 11=OR` |
+| `0x0C`  | `RESULT`    | 4-bit ALU result                |
+| Other   | Invalid     | `PSLVERR=1`                      |
+*/</pre>
+    </div>
+
+    <!-- Testbench Section -->
+    <div class="code-card" data-role="tb">
+      <div class="code-bar">
+        <div class="label-group">
+          <span class="badge badge-tb">Testbench</span>
+          <h3>tb_apb_alu_slave.v</h3>
+        </div>
+        <button class="copy" type="button" data-target="code-apb-alu-tb">Copy Code</button>
+      </div>
+<pre id="code-apb-alu-tb">`timescale 1ns/1ps
+
+module tb_apb_alu_slave;
+
+    // APB SIGNALS  
+
+    reg         PCLK;
+    reg         PRESETn;
+
+    reg  [31:0] PADDR;
+    reg         PWRITE;
+    reg         PSEL;
+    reg         PENABLE;
+    reg  [31:0] PWDATA;
+
+    wire [31:0] PRDATA;
+    wire        PREADY;
+    wire        PSLVERR;
+
+    wire        Difference_unused;
+    wire        Bout_unused;
+
+    apb_alu_slave DUT (
+        .PCLK     (PCLK),
+        .PRESETn  (PRESETn),
+
+        .PADDR    (PADDR),
+        .PWRITE   (PWRITE),
+        .PSEL     (PSEL),
+        .PENABLE  (PENABLE),
+        .PWDATA   (PWDATA),
+
+        .PRDATA   (PRDATA),
+        .PREADY   (PREADY),
+        .PSLVERR  (PSLVERR)
+    );
+
+    // ADDRESS MAP
+
+    localparam ADDR_A      = 32'h0000_0000;
+    localparam ADDR_B      = 32'h0000_0004;
+    localparam ADDR_OP     = 32'h0000_0008;
+    localparam ADDR_RESULT = 32'h0000_000C;
+
+    // ALU OPERATION CODES
+
+    localparam OP_ADD = 2'b00;
+    localparam OP_SUB = 2'b01;
+    localparam OP_AND = 2'b10;
+    localparam OP_OR  = 2'b11;
+
+    // CLOCK GENERATION (10 ns clock period)
+
+    initial begin
+        PCLK = 1'b0;
+        forever #5 PCLK = ~PCLK;
+    end
+
+    initial begin
+        $dumpfile("apb_alu_waveform.vcd");
+        $dumpvars(0, tb_apb_alu_slave);
+    end
+
+    // RESET TASK
+   
+    task reset_dut;
+    begin
+        PADDR   = 32'h0;
+        PWRITE  = 1'b0;
+        PSEL    = 1'b0;
+        PENABLE = 1'b0;
+        PWDATA  = 32'h0;
+
+        PRESETn = 1'b0;
+
+        repeat(2)
+            @(posedge PCLK);
+
+        PRESETn = 1'b1;
+
+        @(posedge PCLK);
+
+        $display("----------------------------------------");
+        $display("RESET COMPLETED");
+        $display("----------------------------------------");
+    end
+    endtask
+
+    // APB WRITE TASK
+    
+    task apb_write;
+        input [31:0] address;
+        input [31:0] data;
+    begin
+
+        // SETUP PHASE
+        @(negedge PCLK);
+
+        PADDR   = address;
+        PWDATA  = data;
+        PWRITE  = 1'b1;
+        PSEL    = 1'b1;
+        PENABLE = 1'b0;
+
+        @(posedge PCLK);
+
+        // ACCESS PHASE
+        @(negedge PCLK);
+
+        PENABLE = 1'b1;
+
+        @(posedge PCLK);
+
+        // Check APB completion/error
+        if (!PREADY)
+            $display("ERROR: Write transaction not ready at address %h", address);
+
+        if (PSLVERR)
+            $display("APB ERROR: Invalid write address = %h", address);
+        else
+            $display("APB WRITE: Address = %h, Data = %h", address, data);
+
+        // Return to IDLE
+        @(negedge PCLK);
+
+        PSEL    = 1'b0;
+        PENABLE = 1'b0;
+        PWRITE  = 1'b0;
+        PADDR   = 32'h0;
+        PWDATA  = 32'h0;
+    end
+    endtask
+
+    // APB READ TASK
+
+    task apb_read;
+        input  [31:0] address;
+        output [31:0] data;
+    begin
+
+        // SETUP PHASE
+        @(negedge PCLK);
+
+        PADDR   = address;
+        PWDATA  = 32'h0;
+        PWRITE  = 1'b0;
+        PSEL    = 1'b1;
+        PENABLE = 1'b0;
+
+        @(posedge PCLK);
+
+        // ACCESS PHASE
+        @(negedge PCLK);
+
+        PENABLE = 1'b1;
+
+        @(posedge PCLK);
+
+        if (!PREADY)
+            $display("ERROR: Read transaction not ready at address %h", address);
+
+        data = PRDATA;
+
+        if (PSLVERR) begin
+            $display("APB ERROR: Invalid read address = %h", address);
+        end
+        else begin
+            $display("APB READ : Address = %h, Data = %h", address, data);
+        end
+
+        // Return to IDLE
+        @(negedge PCLK);
+
+        PSEL    = 1'b0;
+        PENABLE = 1'b0;
+    end
+    endtask
+
+    // ALU OPERATION TASK
+
+    task test_alu;
+        input [3:0] A;
+        input [3:0] B;
+        input [1:0] OP;
+        input [3:0] expected;
+
+        reg [31:0] result;
+    begin
+        $display("");
+        $display("========================================");
+        $display("ALU TEST");
+        $display("A = %d, B = %d, OP = %b", A, B, OP);
+        $display("========================================");
+
+        // Write operand A
+        apb_write(ADDR_A, {28'b0, A});
+
+        // Write operand B
+        apb_write(ADDR_B, {28'b0, B});
+
+        // Write operation
+        apb_write(ADDR_OP, {30'b0, OP});
+
+        // Read result
+        apb_read(ADDR_RESULT, result);
+
+        // Compare result
+        if (result[3:0] == expected) begin
+            $display("PASS: Expected = %h, Received = %h", expected, result[3:0]);
+        end
+        else begin
+            $display("FAIL: Expected = %h, Received = %h", expected, result[3:0]);
+        end
+    end
+    endtask
+
+    // MAIN TEST SEQUENCE
+    reg [31:0] read_value;
+
+    initial begin
+        // RESET
+        reset_dut;
+
+        // TEST 1: ADD (5 + 3 = 8)
+        test_alu(4'd5, 4'd3, OP_ADD, 4'd8);
+
+        // TEST 2: SUBTRACT (9 - 4 = 5)
+        test_alu(4'd9, 4'd4, OP_SUB, 4'd5);
+
+        // TEST 3: AND (1010 &amp; 1100 = 1000)
+        test_alu(4'b1010, 4'b1100, OP_AND, 4'b1000);
+
+        // TEST 4: OR (1010 | 0101 = 1111)
+        test_alu(4'b1010, 4'b0101, OP_OR, 4'b1111);
+
+        // TEST 5: READ BACK OPERAND A
+        $display("");
+        $display("========================================");
+        $display("REGISTER READ-BACK TEST");
+        $display("========================================");
+
+        apb_write(ADDR_A, 32'h0000_0007);
+        apb_read(ADDR_A, read_value);
+
+        if (read_value[3:0] == 4'd7)
+            $display("PASS: Register A read-back successful");
+        else
+            $display("FAIL: Register A read-back");
+
+        // TEST 6: INVALID ADDRESS READ
+        $display("");
+        $display("========================================");
+        $display("INVALID ADDRESS READ TEST");
+        $display("========================================");
+
+        apb_read(32'h0000_0020, read_value);
+
+        if (PSLVERR === 1'b1)
+            $display("PASS: Invalid address generated PSLVERR");
+        else
+            $display("FAIL: PSLVERR was not asserted");
+
+        // TEST 7: INVALID ADDRESS WRITE
+        $display("");
+        $display("========================================");
+        $display("INVALID ADDRESS WRITE TEST");
+        $display("========================================");
+
+        apb_write(32'h0000_0020, 32'h0000_00AA);
+
+        // END SIMULATION
+        $display("");
+        $display("========================================");
+        $display("ALL APB ALU TESTS COMPLETED");
+        $display("========================================");
+
+        #20;
+        $finish;
+    end
+
+endmodule</pre>
+    </div>
+  </div>
+
+  <!-- EXPERIMENT 5: FSM_SOC_Processor_Design -->
+  <div class="experiment-pane" id="exp-fsm-soc-processor" data-keywords="fsm soc processor design control_unit control_unit1 tb_control_unit tb_control_unit1 moore mealy irload pcload inmux outmux alucontrol jz halt">
+    <div class="exp-header">
+      <div class="exp-title-box">
+        <h2>FSM_SOC_Processor_Design</h2>
+        <p class="exp-desc">FSM Controller Unit architectures (Pure Moore <code>control_unit</code> and Mixed Mealy/Moore <code>control_unit1</code>)</p>
+      </div>
+      <div class="tab-bar">
+        <button class="tab-btn active" data-target-group="exp-fsm-soc-processor" data-view="both">All</button>
+        <button class="tab-btn" data-target-group="exp-fsm-soc-processor" data-view="design">Design</button>
+        <button class="tab-btn" data-target-group="exp-fsm-soc-processor" data-view="tb">Testbench</button>
+      </div>
+    </div>
+
+    <!-- Design Section -->
+    <div class="code-card" data-role="design">
+      <div class="code-bar">
+        <div class="label-group">
+          <span class="badge badge-design">Design</span>
+          <h3>control_unit.v (control_unit &amp; control_unit1)</h3>
+        </div>
+        <button class="copy" type="button" data-target="code-fsm-processor-design">Copy Code</button>
+      </div>
+<pre id="code-fsm-processor-design">`timescale 1ns / 1ps
+
+// ============================================================================
+// 1. PURE MOORE CONTROL UNIT (Explicit JZ_CHECK and JZ_LOAD states)
+// ============================================================================
+
+module control_unit (
+    input        clk,
+    input        rst,  
+    input  [2:0]  IR,    // Instruction opcode
+    input        Z,      // Zero flag from Accumulator
+
+    // Control outputs
+    output reg   IRload,
+    output reg   PCload,
+    output reg   INmux,
+    output reg   OUTmux,
+    output reg [1:0] ALUcontrol,
+    output reg   JZ,
+    output reg   Halt
+);
+    // STATE DECLARATION
+  
+    reg [3:0] present_state;
+    reg [3:0] next_state;
+
+    parameter START    = 4'b0000,
+              FETCH    = 4'b0001,
+              DECODE   = 4'b0010,
+              INP      = 4'b0011,
+              OUT      = 4'b0100,
+              INCR     = 4'b0101,
+              CLR      = 4'b0110,
+              JZ_CHECK = 4'b0111,
+              JZ_LOAD  = 4'b1000,
+              HALT     = 4'b1001;
+
+    // 1. PRESENT STATE REGISTER    
+    // Sequential logic
+    // Sensitivity: clock and asynchronous reset
+   
+
+    always @(posedge clk or posedge rst)
+    begin
+        if (rst)
+            present_state &lt;= START;
+        else
+            present_state &lt;= next_state;
+    end
+
+    // 2. NEXT STATE LOGIC
+    // Combinational logic
+    // @(*) automatically includes all signals read inside this block: present_state, IR and Z.
+    
+    always @(*)
+    begin
+
+        // Default next state
+        next_state = START;
+
+        case (present_state)
+
+            START:
+            begin
+                next_state = FETCH;
+            end
+
+            FETCH:
+            begin
+                next_state = DECODE;
+            end
+
+            DECODE:
+            begin
+
+                case (IR)
+
+                    3'b000:                 // INP A
+                        next_state = INP;
+
+                    3'b001:                 // OUT A
+                        next_state = OUT;
+
+                    3'b010:                 // INCR A
+                        next_state = INCR;
+
+                    3'b011:                 // CLR A
+                        next_state = CLR;
+
+                    3'b100:                 // JZ aaaa
+                        next_state = JZ_CHECK;
+
+                    3'b101:                 // HALT
+                        next_state = HALT;
+
+                    default:                // Unused opcode
+                        next_state = FETCH;
+
+                endcase
+
+            end
+
+            INP:
+            begin
+                next_state = FETCH;
+            end
+
+            OUT:
+            begin
+                next_state = FETCH;
+            end
+
+            INCR:
+            begin
+                next_state = FETCH;
+            end
+
+            CLR:
+            begin
+                next_state = FETCH;
+            end
+
+            // JZ CHECK
+            // Z affects ONLY the next state.
+            // No output depends directly on Z.
+          
+           JZ_CHECK:
+            begin
+
+                if (Z == 1'b1)
+                    next_state = JZ_LOAD;
+                else
+                    next_state = FETCH;
+
+            end
+
+            // JZ LOAD
+            // PCload will be generated because the FSM is in JZ_LOAD state.
+        
+            JZ_LOAD:
+            begin
+                next_state = FETCH;
+            end
+
+            HALT:
+            begin
+                // Remain permanently in HALT
+                next_state = HALT;
+            end
+
+            default:
+            begin
+                next_state = START;
+            end
+
+        endcase
+
+    end
+
+    // 3. OUTPUT LOGIC: Pure Moore logic: OUTPUT = f(PRESENT_STATE)
+    // Z and IR are NOT used in this block.
+
+    always @(*)
+    begin
+
+      // DEFAULT OUTPUT VALUES
+     
+        IRload     = 1'b0;
+        PCload     = 1'b0;
+        INmux      = 1'b0;
+        OUTmux     = 1'b0;
+        ALUcontrol = 2'b00;
+        JZ         = 1'b0;
+        Halt       = 1'b0;
+
+
+        case (present_state)
+
+            START:
+            begin
+                 // No control signal
+            end
+
+            FETCH:
+            begin
+                IRload = 1'b1;
+            end
+
+            DECODE:
+            begin
+                // No control signal
+            end
+
+            INP:
+            begin
+                INmux = 1'b1;
+            end
+
+            OUT:
+            begin
+                OUTmux = 1'b1;
+            end
+
+            INCR:
+            begin
+                ALUcontrol = 2'b01;
+            end
+
+            CLR:
+            begin
+                ALUcontrol = 2'b10;
+            end
+
+            JZ_CHECK:
+            begin
+                JZ = 1'b1;
+            end
+
+          JZ_LOAD:
+            begin
+                JZ     = 1'b1;
+                PCload = 1'b1;
+            end
+
+            HALT:
+            begin
+                Halt = 1'b1;
+            end
+
+            default:
+            begin
+                IRload     = 1'b0;
+                PCload     = 1'b0;
+                INmux      = 1'b0;
+                OUTmux     = 1'b0;
+                ALUcontrol = 2'b00;
+                JZ         = 1'b0;
+                Halt       = 1'b0;
+            end
+
+        endcase
+
+    end
+
+endmodule
+
+
+// ============================================================================
+// 2. MIXED MOORE &amp; MEALY CONTROL UNIT (Mealy JZ logic in DECODE)
+// ============================================================================
+
+module control_unit1 (
+    input        clk,
+    input        rst,
+    input  [2:0] IR,       // Instruction opcode
+    input        Z,        // Zero flag from Accumulator
+
+    // Control outputs
+    output reg   IRload,
+    output reg   PCload,
+    output reg   INmux,
+    output reg   OUTmux,
+    output reg [1:0] ALUcontrol,
+    output reg   JZ,
+    output reg   Halt
+);
+
+    // STATE DECLARATION
+
+    reg [3:0] present_state;
+    reg [3:0] next_state;
+
+    parameter START  = 4'b0000,
+              FETCH  = 4'b0001,
+              DECODE = 4'b0010,
+              INP    = 4'b0011,
+              OUT    = 4'b0100,
+              INCR   = 4'b0101,
+              CLR    = 4'b0110,
+              HALT   = 4'b0111;
+
+    // 1. PRESENT STATE REGISTER
+ 
+
+    always @(posedge clk or posedge rst)
+    begin
+        if (rst)
+            present_state &lt;= START;
+        else
+            present_state &lt;= next_state;
+    end
+
+
+    // 2. NEXT STATE LOGIC
+    
+
+    always @(*)
+    begin
+
+        // Default next state
+        next_state = START;
+
+        case (present_state)
+
+            START:
+            begin
+                next_state = FETCH;
+            end
+
+            FETCH:
+            begin
+                next_state = DECODE;
+            end
+
+            DECODE:
+            begin
+
+                case (IR)
+
+                    3'b000:                 // INP A
+                        next_state = INP;
+
+                    3'b001:                 // OUT A
+                        next_state = OUT;
+
+                    3'b010:                 // INCR A
+                        next_state = INCR;
+
+                    3'b011:                 // CLR A
+                        next_state = CLR;
+
+                    3'b100:                 // JZ aaaa
+                        next_state = FETCH;
+
+                    3'b101:                 // HALT
+                        next_state = HALT;
+
+                    default:
+                        next_state = FETCH;
+
+                endcase
+
+            end
+
+            INP:
+            begin
+                next_state = FETCH;
+            end
+
+            OUT:
+            begin
+                next_state = FETCH;
+            end
+
+            INCR:
+            begin
+                next_state = FETCH;
+            end
+
+            CLR:
+            begin
+                next_state = FETCH;
+            end
+
+            HALT:
+            begin
+                // Remain permanently in HALT
+                next_state = HALT;
+            end
+
+            default:
+            begin
+                next_state = START;
+            end
+
+        endcase
+
+    end
+
+    // 3. OUTPUT LOGIC
+    //    Moore outputs + Mealy JZ outputs
+    
+    always @(*)
+    begin
+
+        // Default outputs
+        IRload     = 1'b0;
+        PCload     = 1'b0;
+        INmux      = 1'b0;
+        OUTmux     = 1'b0;
+        ALUcontrol = 2'b00;
+        JZ         = 1'b0;
+        Halt       = 1'b0;
+
+
+        case (present_state)
+
+            START:
+            begin
+                // No control signal
+            end
+
+
+            FETCH:
+            begin
+                IRload = 1'b1;
+            end
+
+
+            DECODE:
+            begin
+
+                // Mealy JZ control
+                if (IR == 3'b100 &amp;&amp; Z == 1'b1)
+                begin
+                    JZ     = 1'b1;
+                    PCload = 1'b1;
+                end
+
+            end
+
+
+            INP:
+            begin
+                INmux = 1'b1;
+            end
+
+
+            OUT:
+            begin
+                OUTmux = 1'b1;
+            end
+
+
+            INCR:
+            begin
+                ALUcontrol = 2'b01;
+            end
+
+
+            CLR:
+            begin
+                ALUcontrol = 2'b10;
+            end
+
+
+            HALT:
+            begin
+                Halt = 1'b1;
+            end
+
+
+            default:
+            begin
+                IRload     = 1'b0;
+                PCload     = 1'b0;
+                INmux      = 1'b0;
+                OUTmux     = 1'b0;
+                ALUcontrol = 2'b00;
+                JZ         = 1'b0;
+                Halt       = 1'b0;
+            end
+
+        endcase
+
+    end
+
+endmodule
+
+/*
+| Signal         | Main function                     | Active state(s)       |
+| -------------- | --------------------------------- | --------------------- |
+| **IRload**     | Load instruction into IR          | `FETCH`               |
+| **PCload**     | Load jump address into PC         | `JZ_LOAD`             |
+| **INmux**      | Select external input for A       | `INP`                 |
+| **OUTmux**     | Select A for output               | `OUT`                 |
+| **ALUcontrol** | Select ALU operation              | `INCR`, `CLR`         |
+| **JZ**         | Select/identify jump-if-zero path | `JZ_CHECK`, `JZ_LOAD` |
+| **Halt**       | Stop processor execution          | `HALT`                |
+*/</pre>
+    </div>
+
+    <!-- Testbench Section -->
+    <div class="code-card" data-role="tb">
+      <div class="code-bar">
+        <div class="label-group">
+          <span class="badge badge-tb">Testbench</span>
+          <h3>tb_control_unit.v (tb_control_unit &amp; tb_control_unit1)</h3>
+        </div>
+        <button class="copy" type="button" data-target="code-fsm-processor-tb">Copy Code</button>
+      </div>
+<pre id="code-fsm-processor-tb">`timescale 1ns / 1ps
+
+// ============================================================================
+// TESTBENCH 1: Pure Moore Control Unit (tb_control_unit)
+// ============================================================================
+
+module tb_control_unit;
+
+    // INPUTS 
+    reg       clk;
+    reg       rst;
+    reg [2:0] IR;
+    reg       Z;
+   
+    // OUTPUTS 
+    wire       IRload;
+    wire       PCload;
+    wire       INmux;
+    wire       OUTmux;
+    wire [1:0] ALUcontrol;
+    wire       JZ;
+    wire       Halt;
+
+    // DUT INSTANTIATION
+    control_unit DUT (
+        .clk        (clk),
+        .rst        (rst),
+        .IR         (IR),
+        .Z          (Z),
+
+        .IRload     (IRload),
+        .PCload     (PCload),
+        .INmux      (INmux),
+        .OUTmux     (OUTmux),
+        .ALUcontrol (ALUcontrol),
+        .JZ         (JZ),
+        .Halt       (Halt)
+    );
+
+    // CLOCK GENERATION
+    initial
+    begin
+        clk = 1'b0;
+        forever
+            #5 clk = ~clk;
+    end
+
+    // TEST SEQUENCE
+    initial
+    begin
+
+        // Initial values
+        rst = 1'b1;
+        IR  = 3'b000;
+        Z   = 1'b0;
+
+        // RESET
+        @(posedge clk); // RESET is done after clock edge
+        rst = 1'b0;
+
+        // Allow START -&gt; FETCH -&gt; DECODE
+        @(negedge clk);
+        IR = 3'b000;       // INP A
+          
+        // TEST 1 : INP A
+        @(posedge clk);    // START -&gt; FETCH
+        @(posedge clk);    // FETCH -&gt; DECODE
+        @(posedge clk);    // DECODE -&gt; INP
+
+        @(negedge clk);
+        IR = 3'b001;       // OUT A
+
+        // TEST 2 : OUT A
+        @(posedge clk);    // INP -&gt; FETCH
+        @(posedge clk);    // FETCH -&gt; DECODE
+        @(posedge clk);    // DECODE -&gt; OUT
+
+        @(negedge clk);
+        IR = 3'b010;       // INCR A
+
+        // TEST 3 : INCR A
+        @(posedge clk);    // OUT -&gt; FETCH
+        @(posedge clk);    // FETCH -&gt; DECODE
+        @(posedge clk);    // DECODE -&gt; INCR
+
+        @(negedge clk);
+        IR = 3'b011;       // CLR A
+
+        // TEST 4 : CLR A
+        @(posedge clk);    // INCR -&gt; FETCH
+        @(posedge clk);    // FETCH -&gt; DECODE
+        @(posedge clk);    // DECODE -&gt; CLR
+
+        @(negedge clk);
+        IR = 3'b100;       // JZ A
+
+        // TEST 5 : JZ with Z = 0
+        Z = 1'b0;
+
+        @(posedge clk);    // CLR -&gt; FETCH
+        @(posedge clk);    // FETCH -&gt; DECODE
+        @(posedge clk);    // DECODE -&gt; JZ_CHECK
+
+        @(posedge clk);    // JZ_CHECK -&gt; FETCH because Z=0
+
+        @(negedge clk);
+        Z  = 1'b1;
+        IR = 3'b100;       // JZ A
+
+        // TEST 6 : JZ with Z = 1
+        @(posedge clk);    // FETCH -&gt; DECODE
+        @(posedge clk);    // DECODE -&gt; JZ_CHECK
+
+        @(posedge clk);    // JZ_CHECK -&gt; JZ_LOAD
+
+        @(posedge clk);    // JZ_LOAD -&gt; FETCH
+
+        // TEST 7 : HALT
+        @(negedge clk);
+        IR = 3'b101;       // HALT
+
+        @(posedge clk);    // FETCH -&gt; DECODE
+        @(posedge clk);    // DECODE -&gt; HALT
+
+        // Remain in HALT for additional clock cycles
+        @(posedge clk);
+        @(posedge clk);
+        @(posedge clk);
+
+        // RESET AGAIN
+        rst = 1'b1;
+        @(posedge clk);
+        rst = 1'b0;
+
+        $finish;
+    end
+
+    // MONITOR
+    always @(posedge clk)
+    begin
+         $display("Time=%0t State=%b IR=%b Z=%b IRload=%b PCload=%b INmux=%b OUTmux=%b ALU=%b JZ=%b Halt=%b",
+                 $time,
+                 DUT.present_state,
+                 IR,
+                 Z,
+                 IRload,
+                 PCload,
+                 INmux,
+                 OUTmux,
+                 ALUcontrol,
+                 JZ,
+                 Halt);
+    end
+  
+    initial
+    begin
+        $dumpfile("control_unit.vcd");
+        $dumpvars(0, tb_control_unit);
+    end
+
+endmodule
+    
+    
+// ============================================================================
+// TESTBENCH 2: Mixed Moore/Mealy Control Unit (tb_control_unit1)
+// ============================================================================
+
+`timescale 1ns / 1ps
+
+module tb_control_unit1;
+
+    reg       clk;
+    reg       rst;
+    reg [2:0] IR;
+    reg       Z;
+
+    wire       IRload;
+    wire       PCload;
+    wire       INmux;
+    wire       OUTmux;
+    wire [1:0] ALUcontrol;
+    wire       JZ;
+    wire       Halt;
+
+    control_unit1 DUT (
+        .clk        (clk),
+        .rst        (rst),
+        .IR         (IR),
+        .Z          (Z),
+
+        .IRload     (IRload),
+        .PCload     (PCload),
+        .INmux      (INmux),
+        .OUTmux     (OUTmux),
+        .ALUcontrol (ALUcontrol),
+        .JZ         (JZ),
+        .Halt       (Halt)
+    );
+
+    initial
+    begin
+        clk = 1'b0;
+        forever
+            #5 clk = ~clk;
+    end
+
+    initial
+    begin
+        // Initial values
+        rst = 1'b1;
+        IR  = 3'b000;
+        Z   = 1'b0;
+
+        @(posedge clk);
+        rst = 1'b0;
+
+        // TEST 1 : INP A
+        @(negedge clk);
+        IR = 3'b000;          // INP A
+
+        @(posedge clk);       // START -&gt; FETCH
+        @(posedge clk);       // FETCH -&gt; DECODE
+        @(posedge clk);       // DECODE -&gt; INP
+
+        @(negedge clk);
+        IR = 3'b001;          // OUT A
+
+        // TEST 2 : OUT A
+        @(posedge clk);       // INP -&gt; FETCH
+        @(posedge clk);       // FETCH -&gt; DECODE
+        @(posedge clk);       // DECODE -&gt; OUT
+
+        @(negedge clk);
+        IR = 3'b010;          // INCR A
+
+        // TEST 3 : INCR A
+        @(posedge clk);       // OUT -&gt; FETCH
+        @(posedge clk);       // FETCH -&gt; DECODE
+        @(posedge clk);       // DECODE -&gt; INCR
+
+        @(negedge clk);
+        IR = 3'b011;          // CLR A
+
+        // TEST 4 : CLR A
+        @(posedge clk);       // INCR -&gt; FETCH
+        @(posedge clk);       // FETCH -&gt; DECODE
+        @(posedge clk);       // DECODE -&gt; CLR
+
+        @(negedge clk);
+        IR = 3'b100;          // JZ A
+        Z  = 1'b0;
+
+        // TEST 5 : JZ A WITH Z = 0
+        @(posedge clk);       // CLR -&gt; FETCH
+        @(posedge clk);       // FETCH -&gt; DECODE
+
+        // Now FSM is in DECODE.
+        // Since IR=100 and Z=0:
+        // JZ=0 and PCload=0
+        // Next state = FETCH
+        @(posedge clk);       // DECODE -&gt; FETCH
+
+        // TEST 6 : JZ A WITH Z = 1
+        @(negedge clk);
+        IR = 3'b100;          // JZ A
+        Z  = 1'b1;
+
+        @(posedge clk);       // FETCH -&gt; DECODE
+
+        // In DECODE:
+        // IR=100 and Z=1
+        // JZ=1
+        // PCload=1
+        // Next state = FETCH
+        @(posedge clk);       // DECODE -&gt; FETCH
+
+        // TEST 7 : HALT
+        @(negedge clk);
+        IR = 3'b101;          // HALT
+
+        @(posedge clk);       // FETCH -&gt; DECODE
+        @(posedge clk);       // DECODE -&gt; HALT
+
+        // Remain in HALT
+        @(posedge clk);
+        @(posedge clk);
+        @(posedge clk);
+
+        // RESET AGAIN
+        rst = 1'b1;
+        @(posedge clk);
+        rst = 1'b0;
+
+        // FINISH SIMULATION
+        $finish;
+    end
+
+    always @(posedge clk)
+    begin
+        $display(
+        "Time=%0t State=%b IR=%b Z=%b IRload=%b PCload=%b INmux=%b OUTmux=%b ALU=%b JZ=%b Halt=%b",
+        $time,
+        DUT.present_state,
+        IR,
+        Z,
+        IRload,
+        PCload,
+        INmux,
+        OUTmux,
+        ALUcontrol,
+        JZ,
+        Halt
+        );
+    end
+
+    initial
+    begin
+        $dumpfile("control_unit.vcd");
+        $dumpvars(0, tb_control_unit);
+    end
+
+endmodule</pre>
+    </div>
+  </div>
+
+  <!-- EXPERIMENT 6: SOC_control_Unit -->
+  <div class="experiment-pane" id="exp-soc-control-unit" data-keywords="soc_control_unit controlunit controlunit_tb fsm opcode ir aneq ir_load pc_load inmux aload jnzmux halt">
+    <div class="exp-header">
+      <div class="exp-title-box">
+        <h2>SOC_control_Unit</h2>
+        <p class="exp-desc">8-state Processor Control Unit with Opcode Decoder (INPUT, OUTPUT, DEC, JNZ, HALT) and Flag Checking</p>
+      </div>
+      <div class="tab-bar">
+        <button class="tab-btn active" data-target-group="exp-soc-control-unit" data-view="both">All</button>
+        <button class="tab-btn" data-target-group="exp-soc-control-unit" data-view="design">Design</button>
+        <button class="tab-btn" data-target-group="exp-soc-control-unit" data-view="tb">Testbench</button>
+      </div>
+    </div>
+
+    <!-- Design Section -->
+    <div class="code-card" data-role="design">
+      <div class="code-bar">
+        <div class="label-group">
+          <span class="badge badge-design">Design</span>
+          <h3>controlunit.v</h3>
+        </div>
+        <button class="copy" type="button" data-target="code-soc-controlunit-design">Copy Code</button>
+      </div>
+<pre id="code-soc-controlunit-design">`timescale 1ns / 1ps
+
+module controlunit(
+    input  clk,
+    input  rst,
+    input  [7:5] IR,
+    input  Aneq,
+
+    output reg ir_load,
+    output reg pc_load,
+    output reg inmux,
+    output reg aload,
+    output reg jnzmux,
+    output reg HALT
+);
+
+    // State registers
+    reg [2:0] PS;
+    reg [2:0] NS;
+
+    // State encoding
+    parameter START  = 3'b000,
+              FETCH  = 3'b001,
+              DECODE = 3'b010,
+              INPUT  = 3'b011,
+              OUTPUT = 3'b100,
+              DEC    = 3'b101,
+              JNZ    = 3'b110,
+              S_HALT = 3'b111;
+
+    // OPCODE encoding
+    parameter OP_INPUT  = 3'b011,
+              OP_OUTPUT = 3'b100,
+              OP_DEC    = 3'b101,
+              OP_JNZ    = 3'b110,
+              OP_HALT   = 3'b111;
+
+    // Next-state combinational logic
+    always @(*) begin
+
+        // Default state
+        NS = START;
+
+        case (PS)
+
+            START: begin
+                NS = FETCH;
+            end
+
+            FETCH: begin
+                NS = DECODE;
+            end
+
+            DECODE: begin
+
+                case (IR[7:5])
+
+                    OP_INPUT: begin
+                        NS = INPUT;
+                    end
+
+                    OP_OUTPUT: begin
+                        NS = OUTPUT;
+                    end
+
+                    OP_DEC: begin
+                        NS = DEC;
+                    end
+
+                    OP_JNZ: begin
+                        NS = JNZ;
+                    end
+
+                    OP_HALT: begin
+                        NS = S_HALT;
+                    end
+
+                    default: begin
+                        NS = START;
+                    end
+
+                endcase
+
+            end
+
+            INPUT: begin
+                NS = START;
+            end
+
+            OUTPUT: begin
+                NS = START;
+            end
+
+            DEC: begin
+                NS = START;
+            end
+
+            JNZ: begin
+                NS = START;
+            end
+
+            S_HALT: begin
+                NS = S_HALT;
+            end
+
+            default: begin
+                NS = START;
+            end
+
+        endcase
+    end
+
+    // State register
+    always @(posedge clk) begin
+
+        if (rst)
+            PS &lt;= START;
+        else
+            PS &lt;= NS;
+
+    end
+
+    // Control output logic
+    always @(*) begin
+
+        // Default values
+        ir_load = 1'b0;
+        pc_load = 1'b0;
+        inmux   = 1'b0;
+        aload   = 1'b0;
+        jnzmux  = 1'b0;
+        HALT    = 1'b0;
+
+        case (PS)
+
+            // START
+            START: begin
+                ir_load = 1'b0;
+                pc_load = 1'b0;
+                inmux   = 1'b0;
+                aload   = 1'b0;
+                jnzmux  = 1'b0;
+                HALT    = 1'b0;
+            end
+
+            // FETCH
+            FETCH: begin
+                ir_load = 1'b1;
+                pc_load = 1'b1;
+                inmux   = 1'b0;
+                aload   = 1'b0;
+                jnzmux  = 1'b0;
+                HALT    = 1'b0;
+            end
+
+            // DECODE
+            DECODE: begin
+                ir_load = 1'b0;
+                pc_load = 1'b0;
+                inmux   = 1'b0;
+                aload   = 1'b0;
+                jnzmux  = 1'b0;
+                HALT    = 1'b0;
+            end
+
+            // INPUT
+            INPUT: begin
+                ir_load = 1'b0;
+                pc_load = 1'b0;
+                inmux   = 1'b1;
+                aload   = 1'b1;
+                jnzmux  = 1'b0;
+                HALT    = 1'b0;
+            end
+
+            // OUTPUT
+            OUTPUT: begin
+                ir_load = 1'b0;
+                pc_load = 1'b0;
+                inmux   = 1'b0;
+                aload   = 1'b0;
+                jnzmux  = 1'b0;
+                HALT    = 1'b0;
+            end
+
+            // DEC
+            DEC: begin
+                ir_load = 1'b0;
+                pc_load = 1'b0;
+                inmux   = 1'b0;
+                aload   = 1'b1;
+                jnzmux  = 1'b0;
+                HALT    = 1'b0;
+            end
+
+            // JNZ
+            JNZ: begin
+                ir_load = 1'b0;
+                inmux   = 1'b0;
+                aload   = 1'b0;
+                jnzmux  = 1'b1;
+                HALT    = 1'b0;
+
+                if (Aneq)
+                    pc_load = 1'b1;
+                else
+                    pc_load = 1'b0;
+            end
+
+            // HALT
+            S_HALT: begin
+                ir_load = 1'b0;
+                pc_load = 1'b0;
+                inmux   = 1'b0;
+                aload   = 1'b0;
+                jnzmux  = 1'b0;
+                HALT    = 1'b1;
+            end
+
+            // DEFAULT
+            default: begin
+                ir_load = 1'b0;
+                pc_load = 1'b0;
+                inmux   = 1'b0;
+                aload   = 1'b0;
+                jnzmux  = 1'b0;
+                HALT    = 1'b0;
+            end
+
+        endcase
+
+    end
+
+endmodule</pre>
+    </div>
+
+    <!-- Testbench Section -->
+    <div class="code-card" data-role="tb">
+      <div class="code-bar">
+        <div class="label-group">
+          <span class="badge badge-tb">Testbench</span>
+          <h3>controlunit_tb.v</h3>
+        </div>
+        <button class="copy" type="button" data-target="code-soc-controlunit-tb">Copy Code</button>
+      </div>
+<pre id="code-soc-controlunit-tb">`timescale 1ns / 1ps
+
+module controlunit_tb;
+
+    // Inputs to DUT
+    reg clk;
+    reg rst;
+    reg [7:5] IR;
+    reg Aneq;
+
+    // Outputs from DUT
+    wire ir_load;
+    wire pc_load;
+    wire inmux;
+    wire aload;
+    wire jnzmux;
+    wire HALT;
+
+    // Instantiate Control Unit
+    controlunit DUT (
+        .clk      (clk),
+        .rst      (rst),
+        .IR       (IR),
+        .Aneq     (Aneq),
+        .ir_load  (ir_load),
+        .pc_load  (pc_load),
+        .inmux    (inmux),
+        .aload    (aload),
+        .jnzmux   (jnzmux),
+        .HALT     (HALT)
+    );
+
+    always #5 clk = ~clk;
+
+    initial begin
+
+        // Initial values
+        clk  = 1'b0;
+        rst  = 1'b1;
+        IR   = 3'b000;
+        Aneq = 1'b0;
+
+        // RESET
+        #10;
+        rst = 1'b0;
+
+        // INPUT instruction (Opcode = 011)
+        IR = 3'b011;
+        #40;
+
+        // OUTPUT instruction (Opcode = 100)
+        IR = 3'b100;
+        #40;
+
+        // DEC instruction (Opcode = 101)
+        IR = 3'b101;
+        #40;
+
+        // JNZ instruction (Aneq = 0)
+        IR   = 3'b110;
+        Aneq = 1'b0;
+        #40;
+
+        // JNZ instruction (Aneq = 1)
+        IR   = 3'b110;
+        Aneq = 1'b1;
+        #40;
+
+        // HALT instruction (Opcode = 111)
+        IR = 3'b111;
+        #40;
+
+        // End simulation
+        $finish;
+
+    end
+
+    initial begin
+        $monitor("Time=%0t | IR=%b | Aneq=%b | ir_load=%b | pc_load=%b | inmux=%b | aload=%b | jnzmux=%b | HALT=%b",
+                 $time,
+                 IR,
+                 Aneq,
+                 ir_load,
+                 pc_load,
+                 inmux,
+                 aload,
+                 jnzmux,
+                 HALT);
+    end
+
+    initial begin
+        $dumpfile("controlunit.vcd");
+        $dumpvars(0, controlunit_tb);
+    end
+
+endmodule</pre>
+    </div>
+  </div>
+
+  <!-- EXPERIMENT 7: Adder_SOC_slave_controller -->
+  <div class="experiment-pane" id="exp-adder-soc-slave" data-keywords="adder_soc_slave_controller apb_soc_adder my_adder1 tb_apb_soc_adder apb adder slave pready pslverr offset">
+    <div class="exp-header">
+      <div class="exp-title-box">
+        <h2>Adder_SOC_slave_controller</h2>
+        <p class="exp-desc">8-bit Core Adder IP with APB Slave Interface wrapper, address mapped register files, and read-only protection</p>
+      </div>
+      <div class="tab-bar">
+        <button class="tab-btn active" data-target-group="exp-adder-soc-slave" data-view="both">All</button>
+        <button class="tab-btn" data-target-group="exp-adder-soc-slave" data-view="design">Design</button>
+        <button class="tab-btn" data-target-group="exp-adder-soc-slave" data-view="tb">Testbench</button>
+      </div>
+    </div>
+
+    <!-- Design Section -->
+    <div class="code-card" data-role="design">
+      <div class="code-bar">
+        <div class="label-group">
+          <span class="badge badge-design">Design</span>
+          <h3>apb_soc_adder.v</h3>
+        </div>
+        <button class="copy" type="button" data-target="code-adder-soc-design">Copy Code</button>
+      </div>
+<pre id="code-adder-soc-design">`timescale 1ns/1ps
+
+// 1. CORE IP BLOCK (The Functional Worker)
+
+module my_adder1(
+    input  wire [7:0] a,
+    input  wire [7:0] b,
+    output wire [8:0] sum
+);
+    
+    assign sum = a + b;
+endmodule
+
+// APB SLAVE WRAPPER (The Standard Interface)
+
+module apb_soc_adder(
+  
+    // Core APB System Interface Ports
+    input  wire        PCLK,       // Bus Clock
+    input  wire        PRESETn,    // Active-LOW Bus Reset
+    
+    // APB Master Control Command Bus
+    input  wire [31:0] PADDR,      // 32-bit Address Bus
+    input  wire        PWRITE,     // 1 = Write, 0 = Read
+    input  wire        PSEL,       // Peripheral Selection Line
+    input  wire        PENABLE,    // Strobe / Access Phase Enable
+    input  wire [31:0] PWDATA,     // Write Data Payload Bus
+    
+    // APB Response Output Bus back to Master
+    output reg  [31:0] PRDATA,     // Read Data Return Bus
+    output wire        PREADY,     // Slave Ready Status Handshake
+    output reg         PSLVERR     // Slave Protocol Error Flag
+);
+  
+    // Internal Wrapper Peripheral Storage Registers
+    reg [31:0] reg1; // Offset 0x00: Operand A
+    reg [31:0] reg2; // Offset 0x04: Operand B
+    reg [31:0] reg4; // Offset 0x0C: Scratchpad Register
+    
+    // Interconnect wire between Core IP output and Wrapper Mux
+    wire [8:0] w_sum;
+  
+    // Standardized Memory Map Registers Offset Addressing
+    parameter ADDR_REG1 = 4'h0,  // Operand A
+              ADDR_REG2 = 4'h4,  // Operand B
+              ADDR_REG3 = 4'h8,  // Read-Only Result Zone
+              ADDR_REG4 = 4'hC;  // Scratchpad
+  
+    // APB3 Handshake Engine: This slave is always ready in 2 cycles (zero wait-states)
+    assign PREADY = 1'b1; 
+  
+    // APB REGISTER WRITE INTERFACE LOGIC 
+    always @(posedge PCLK or negedge PRESETn) begin
+        if (!PRESETn) begin
+            reg1    &lt;= 32'h0;
+            reg2    &lt;= 32'h0;
+            reg4    &lt;= 32'h0;
+            PSLVERR &lt;= 1'b0;
+        end  
+        else begin
+            PSLVERR &lt;= 1'b0; // Default clear error flag
+
+            // APB Write must strictly occur only when PSEL=1, PENABLE=1, and PWRITE=1
+            if (PSEL &amp;&amp; PWRITE &amp;&amp; PENABLE) begin
+                case (PADDR[3:0]) // Decoding the lowest nibble for offset mapping
+                    ADDR_REG1: reg1 &lt;= PWDATA;
+                    ADDR_REG2: reg2 &lt;= PWDATA;
+                    ADDR_REG4: reg4 &lt;= PWDATA;
+                    ADDR_REG3: PSLVERR &lt;= 1'b1; // Error: Attempted to write to a read-only result zone
+                    default:   PSLVERR &lt;= 1'b1; // Error: Address out-of-bounds
+                endcase
+            end
+        end
+    end
+
+    // APB REGISTER READ INTERFACE LOGIC 
+    always @(posedge PCLK or negedge PRESETn) begin
+        if (!PRESETn) begin
+            PRDATA &lt;= 32'h0;
+        end  
+        else begin
+            // APB Read occurs during the active selection window when PWRITE=0
+            if (PSEL &amp;&amp; !PWRITE) begin
+                case (PADDR[3:0])
+                    ADDR_REG1: PRDATA &lt;= reg1;
+                    ADDR_REG2: PRDATA &lt;= reg2;
+                    // Zero-extend the 9-bit core sum to match 32-bit data lines
+                    ADDR_REG3: PRDATA &lt;= {23'b0, w_sum}; 
+                    ADDR_REG4: PRDATA &lt;= reg4;
+                    default: begin
+                        PRDATA  &lt;= 32'hDEADBEEF; // Error feedback signature
+                        // Note: PSLVERR will be set high in the synchronous block above
+                    end
+                endcase
+            end
+            else begin
+                PRDATA &lt;= 32'h0; // Maintain zero baseline if not targeted
+            end
+        end
+    end
+  
+    // CORE IP HARDWARE INSTANTIATION
+    my_adder1 inst1 (
+        .a(reg1[7:0]),
+        .b(reg2[7:0]),
+        .sum(w_sum)
+    );
+  
+endmodule</pre>
+    </div>
+
+    <!-- Testbench Section -->
+    <div class="code-card" data-role="tb">
+      <div class="code-bar">
+        <div class="label-group">
+          <span class="badge badge-tb">Testbench</span>
+          <h3>tb_apb_soc_adder.v</h3>
+        </div>
+        <button class="copy" type="button" data-target="code-adder-soc-tb">Copy Code</button>
+      </div>
+<pre id="code-adder-soc-tb">`timescale 1ns/1ps
+
+module tb_apb_soc_adder;
+
+    // Master Driver Control Wires (Driven non-blockingly)
+    reg        PCLK;
+    reg        PRESETn;
+    reg [31:0] PADDR;
+    reg        PWRITE;
+    reg        PSEL;
+    reg        PENABLE;
+    reg [31:0] PWDATA;
+    
+    // Outputs from UUT
+    wire [31:0] PRDATA;
+    wire        PREADY;
+    wire        PSLVERR;
+
+    apb_soc_adder uut (
+        .PCLK(PCLK), .PRESETn(PRESETn), .PADDR(PADDR), .PWRITE(PWRITE),
+        .PSEL(PSEL), .PENABLE(PENABLE), .PWDATA(PWDATA), .PRDATA(PRDATA),
+        .PREADY(PREADY), .PSLVERR(PSLVERR)
+    );
+
+    // Generate 100MHz System Clock Reference (10ns period)
+    always #5 PCLK = ~PCLK;
+
+    initial begin
+        
+        $dumpfile("dump.vcd");
+        $dumpvars(0, tb_apb_soc_adder);
+
+        PCLK    = 1'b0;
+        PRESETn = 1'b0;
+        PADDR   = 32'h0;
+        PWRITE  = 1'b0;
+        PSEL    = 1'b0;
+        PENABLE = 1'b0;
+        PWDATA  = 32'h0;
+
+        // Reset Sequence
+        #15;
+        PRESETn = 1'b1; 
+        
+        // Synchronize with the next clean clock edge
+        @(posedge PCLK); 
+
+        // TRANSACTION 1: WRITE OPERAND A = 8'h0F TO REG1 (Offset 0x0)
+        @(posedge PCLK); 
+        PADDR  &lt;= 32'h0;   // Use non-blocking mapping to eliminate race conditions
+        PWRITE &lt;= 1'b1;    
+        PSEL   &lt;= 1'b1;    
+        PWDATA &lt;= 32'h0F;  
+        
+        @(posedge PCLK); 
+        PENABLE &lt;= 1'b1;   // Assert Access Strobe
+        
+        @(posedge PCLK);   // End of Write Transaction
+        PSEL    &lt;= 1'b0;
+        PENABLE &lt;= 1'b0;
+
+        // TRANSACTION 2: WRITE OPERAND B = 8'h01 TO REG2 (Offset 0x4)
+        @(posedge PCLK); 
+        PADDR  &lt;= 32'h4;   
+        PWRITE &lt;= 1'b1;
+        PSEL   &lt;= 1'b1;
+        PWDATA &lt;= 32'h01;
+        
+        @(posedge PCLK); 
+        PENABLE &lt;= 1'b1;
+        
+        @(posedge PCLK);   // End of Write Transaction
+        PSEL    &lt;= 1'b0;
+        PENABLE &lt;= 1'b0;
+
+        // TRANSACTION 3: READ RESULT FROM REG3 (Offset 0x8)
+        @(posedge PCLK); 
+        PADDR  &lt;= 32'h8;   // Point to Result register
+        PWRITE &lt;= 1'b0;    // Read operation
+        PSEL   &lt;= 1'b1;
+        
+        @(posedge PCLK); 
+        PENABLE &lt;= 1'b1;   // Enter Access phase
+        
+        @(posedge PCLK);   // Read phase ends, data is sampled right at this edge
+        #1; // Minor 1ns delay step to let the internal non-blocking queues update before printing
+        $display("[SIMULATION REPORT] APB Readback successful. Sum Output = 32'h%h (Expected: 32'h10)", PRDATA);
+        
+        PSEL    &lt;= 1'b0;
+        PENABLE &lt;= 1'b0;
+
+        #20;
+        $finish;
+    end
+
+endmodule</pre>
+    </div>
+  </div>
+
+  <!-- EXPERIMENT 8: soc_adder(1) -->
+  <div class="experiment-pane" id="exp-soc-adder-1" data-keywords="soc_adder 1 my_adder1 tb_soc_adder sel wen 20-bit addr generic bus adder">
+    <div class="exp-header">
+      <div class="exp-title-box">
+        <h2>soc_adder(1)</h2>
+        <p class="exp-desc">SOC Adder with 20-bit address bus, synchronous register bank, and generic memory-mapped bus slave</p>
+      </div>
+      <div class="tab-bar">
+        <button class="tab-btn active" data-target-group="exp-soc-adder-1" data-view="both">All</button>
+        <button class="tab-btn" data-target-group="exp-soc-adder-1" data-view="design">Design</button>
+        <button class="tab-btn" data-target-group="exp-soc-adder-1" data-view="tb">Testbench</button>
+      </div>
+    </div>
+
+    <!-- Design Section -->
+    <div class="code-card" data-role="design">
+      <div class="code-bar">
+        <div class="label-group">
+          <span class="badge badge-design">Design</span>
+          <h3>soc_adder.v</h3>
+        </div>
+        <button class="copy" type="button" data-target="code-soc-adder-1-design">Copy Code</button>
+      </div>
+<pre id="code-soc-adder-1-design">`timescale 1ns/1ps
+
+module my_adder1(
+    input [7:0] a,
+    input [7:0] b,
+    output [8:0] sum
+);
+    
+    assign sum = a + b;
+    
+endmodule
+
+module soc_adder(
+    input clk, rst, sel, wen,
+    input [19:0] addr,
+    input [31:0] wr_data,
+    output reg [31:0] rd_data
+);
+  
+    reg [31:0] reg1;
+    reg [31:0] reg2;
+    reg [31:0] reg3;
+    reg [31:0] reg4;
+  
+    wire [8:0] w_sum;
+  
+    parameter ADDR_REG1 = 20'd0,
+              ADDR_REG2 = 20'd4,
+              ADDR_REG3 = 20'd8,
+              ADDR_REG4 = 20'd12;
+  
+    always @(posedge clk) begin
+        if (rst) begin
+            reg1 &lt;= 0;
+            reg2 &lt;= 0;
+            reg3 &lt;= 0;
+            reg4 &lt;= 0;
+        end  
+        else begin
+            if (sel &amp; wen) begin
+                case (addr)
+                    ADDR_REG1: reg1 &lt;= wr_data;
+                    ADDR_REG2: reg2 &lt;= wr_data;
+                    ADDR_REG3: reg3 &lt;= wr_data;
+                    ADDR_REG4: reg4 &lt;= wr_data;
+                    default:   reg1 &lt;= wr_data;
+                endcase
+            end
+        end
+    end
+ 
+    always @(posedge clk) begin
+        if (rst) begin
+            rd_data &lt;= 0;
+        end  
+        else begin
+            if (sel &amp; (~wen)) begin
+                case (addr)
+                    ADDR_REG1: rd_data &lt;= reg1;
+                    ADDR_REG2: rd_data &lt;= reg2;
+                    ADDR_REG3: rd_data &lt;= w_sum;
+                    ADDR_REG4: rd_data &lt;= reg4;
+                    default:   rd_data &lt;= reg1;
+                endcase
+            end
+        end
+    end
+  
+    my_adder1 inst1 (
+        .a(reg1[7:0]),
+        .b(reg2[7:0]),
+        .sum(w_sum)
+    );
+  
+endmodule</pre>
+    </div>
+
+    <!-- Testbench Section -->
+    <div class="code-card" data-role="tb">
+      <div class="code-bar">
+        <div class="label-group">
+          <span class="badge badge-tb">Testbench</span>
+          <h3>tb_soc_adder.v</h3>
+        </div>
+        <button class="copy" type="button" data-target="code-soc-adder-1-tb">Copy Code</button>
+      </div>
+<pre id="code-soc-adder-1-tb">`timescale 1ns/1ps
+
+module tb_soc_adder();
+  
+    reg clk, rst, sel, wen;
+    reg [19:0] addr;
+    reg [31:0] wr_data;
+    wire [31:0] rd_data;  
+  
+    parameter ADDR_REG1 = 20'd0,
+              ADDR_REG2 = 20'd4,
+              ADDR_REG3 = 20'd8,
+              ADDR_REG4 = 20'd12;
+  
+    soc_adder soc_adder_inst(    
+        .clk(clk),
+        .rst(rst),
+        .sel(sel),
+        .wen(wen),
+        .addr(addr),
+        .wr_data(wr_data),
+        .rd_data(rd_data)
+    );
+  
+    always #5 clk = ~clk;
+    initial clk = 0;
+  
+    initial begin
+        $dumpfile("soc_adder_dump_vars.vcd");
+        $dumpvars(1);
+    end
+  
+    initial begin
+        rst = 1; #10; rst = 0; #10;
+      
+        sel = 1; wen = 1; addr = ADDR_REG1; wr_data = 32'd2; #10;  // a = 2;
+        sel = 1; wen = 1; addr = ADDR_REG2; wr_data = 32'd3; #10;  // b = 3;
+      
+        sel = 1; wen = 0; addr = ADDR_REG3; #10;                   // read sum
+        $display("addr = %0d, rd_data = %0d\n", addr, rd_data);
+      
+        $finish;
+    end
+  
+endmodule</pre>
+    </div>
+  </div>
+
 </main>
 
 <script>
+  // Copy utility
   function fallbackCopy(text) {
     var ta = document.createElement("textarea");
     ta.value = text;
@@ -620,10 +3937,12 @@ endmodule
 
   document.querySelectorAll("button.copy").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      var text = document.getElementById(btn.dataset.target).textContent;
+      var targetEl = document.getElementById(btn.dataset.target);
+      if (!targetEl) return;
+      var text = targetEl.textContent;
       var done = function (ok) {
-        btn.textContent = ok ? "Copied" : "Failed";
-        setTimeout(function () { btn.textContent = "Copy"; }, 1500);
+        btn.textContent = ok ? "Copied!" : "Failed";
+        setTimeout(function () { btn.textContent = "Copy Code"; }, 1500);
       };
       if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(text).then(function () { done(true); },
@@ -631,6 +3950,65 @@ endmodule
       } else {
         done(fallbackCopy(text));
       }
+    });
+  });
+
+  // Sidebar experiment selection
+  const navButtons = document.querySelectorAll(".nav-btn");
+  const expPanes = document.querySelectorAll(".experiment-pane");
+
+  navButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const expId = btn.getAttribute("data-exp");
+      navButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      expPanes.forEach(pane => {
+        if (pane.id === expId) {
+          pane.classList.add("active");
+        } else {
+          pane.classList.remove("active");
+        }
+      });
+    });
+  });
+
+  // Tab View toggling (All / Design / Testbench)
+  document.querySelectorAll(".tab-btn").forEach(tab => {
+    tab.addEventListener("click", () => {
+      const parentPaneId = tab.getAttribute("data-target-group");
+      const view = tab.getAttribute("data-view");
+      const pane = document.getElementById(parentPaneId);
+      if (!pane) return;
+
+      // Update active tab button
+      pane.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      tab.classList.add("active");
+
+      // Show/Hide code cards based on view
+      const cards = pane.querySelectorAll(".code-card");
+      cards.forEach(card => {
+        const role = card.getAttribute("data-role");
+        if (view === "both" || role === view) {
+          card.style.display = "block";
+        } else {
+          card.style.display = "none";
+        }
+      });
+    });
+  });
+
+  // Quick filter / search
+  const searchInput = document.getElementById("searchInput");
+  searchInput.addEventListener("input", function() {
+    const q = this.value.toLowerCase().trim();
+    navButtons.forEach(btn => {
+      const expId = btn.getAttribute("data-exp");
+      const pane = document.getElementById(expId);
+      const textMatch = btn.textContent.toLowerCase().includes(q) ||
+        (pane && pane.getAttribute("data-keywords").toLowerCase().includes(q));
+      
+      btn.parentElement.style.display = textMatch ? "" : "none";
     });
   });
 </script>
